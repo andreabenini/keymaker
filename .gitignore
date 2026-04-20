@@ -4,3 +4,9 @@
 .devcontainer
 .gemini
 .vscode
+node_modules
+
+# ESP32 work directories
+build
+contrib
+managed_components
