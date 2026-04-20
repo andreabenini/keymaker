@@ -1,1 +1,6 @@
-#
+# Ignoring caching or local work dirs
+# Common to most of my projects
+.cache
+.devcontainer
+.gemini
+.vscode
