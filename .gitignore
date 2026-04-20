@@ -8,5 +8,5 @@ node_modules
 
 # ESP32 work directories
 build
-contrib
+dist
 managed_components
