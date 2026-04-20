@@ -4,9 +4,14 @@
 .devcontainer
 .gemini
 .vscode
+
+# Generic tmp files, usually ignored
+tmp.*
+
+# Mostly around lvgl font conversion utilities
 node_modules
 
 # ESP32 work directories
 build
-dist
+components
 managed_components
