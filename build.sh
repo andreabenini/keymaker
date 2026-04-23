@@ -20,4 +20,11 @@
 #
 
 # Simple builder based on current ESP-IDF version
+line() {
+    printf '%*s\r' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    echo -e "\e[32m[$1] \e[0m"
+}
+
+echo ""
+line "Building project"
 . $HOME/.espressif/v5.5.3/esp-idf/export.sh && idf.py build
