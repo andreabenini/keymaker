@@ -88,6 +88,14 @@ ESP-IDF: ${IDF_VERSION}
 Target: ESP32 (CYD)
 EOF
 
+# Create .tar.gz file
+TARGET_DIR="keymaker-${VERSION}"
+TARGZ_FILE="${TARGET_DIR}.tar.gz"
+rm -rf "${TARGET_DIR}"
+cp -r "${DIST_DIR}" "${TARGET_DIR}"
+tar zcf "${TARGZ_FILE}" "${TARGET_DIR}"
+rm -rf "${TARGET_DIR}"
+
 # Summary
 ITEM_LIST='       - %-50s%10s\n'
 print_success "Distribution directory populated: ${DIST_DIR}/"
@@ -97,6 +105,10 @@ print_success "Firmware files"
 ls -lh "${DIST_DIR}/build/"*.bin "${DIST_DIR}/build/"*/*.bin 2>/dev/null | sed "s#${SCRIPT_DIR}/dist#.#" | awk -v fmt="$ITEM_LIST" '{printf fmt, $9, $5}'
 echo ""
 print_info "Distribution created, to install:"
-echo "       - Share '${DIST_DIR}/' folder"
-echo "       - Create an archive: tar czf keymaker-${VERSION}.tar.gz -C dist ."
-print_success "Simply run: ./install.sh within ./dist directory\n"
+print_success "Share '${DIST_DIR}/' folder"
+echo "       - cd ./$(basename ${DIST_DIR})/; ./install.sh"
+print_success "Share archive: ${TARGZ_FILE}"
+echo "       - tar zxf ${TARGZ_FILE}"
+echo "       - cd keymaker-${VERSION}; ./install.sh"
+
+echo ""
