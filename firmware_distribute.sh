@@ -1,7 +1,13 @@
 #!/bin/bash
 #
-# Populate distribution directory 'dist' and create firmware package for CYD
-# Prepares the dist/ directory with firmware and installer for easy distribution
+#   Populate distribution directory 'dist' and create firmware package for CYD
+#   Prepares the dist/ directory with firmware and installer for easy distribution
+#
+#   Usage:
+#       ./firmware_distribute.sh            # Create installer based on latest tag or git commit
+#       ./firmware_distribute.sh [version]  # Explicitly create an installer based on <version>
+#
+#   <version> might also be a free text string and not tied to anything in specific
 #
 set -e
 
@@ -72,11 +78,13 @@ EOF
 cp "${SCRIPT_DIR}/AUTHORS.md" "${DIST_DIR}/AUTHORS.md"
 
 # Create version info
-VERSION="unknown"
-if git describe --tags --always &> /dev/null 2>&1; then
-    VERSION=$(git describe --tags --always --dirty)
-elif [ -f "${SCRIPT_DIR}/build/keymaker.bin" ]; then
-    VERSION=$(date -r "${SCRIPT_DIR}/build/keymaker.bin" +%Y%m%d-%H%M%S)
+VERSION="$1"
+if [ "$VERSION" == "" ]; then
+    if git describe --tags --always &> /dev/null 2>&1; then
+        VERSION=$(git describe --tags --always --dirty)
+    elif [ -f "${SCRIPT_DIR}/build/keymaker.bin" ]; then
+        VERSION=$(date -r "${SCRIPT_DIR}/build/keymaker.bin" +%Y%m%d-%H%M%S)
+    fi
 fi
 IDF_VERSION=$(cat ${SCRIPT_DIR}/flash.sh | sed -n 's|.*/v\([0-9.]*\)/.*|\1|p')
 cat > "${DIST_DIR}/VERSION.txt" << EOF
