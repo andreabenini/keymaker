@@ -15,10 +15,11 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # dummy functions here used for producing neat display information
-print_info()    { echo -e "${BLUE}🛈${NC} $1";   }
-print_success() { echo -e "${GREEN}✓${NC} $1";   }
-print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
-print_error()   { echo -e "${RED}✗${NC} $1";     }
+print_info()    { echo -e "${BLUE}🛈${NC}  $1";   }
+print_success() { echo -e "${GREEN}✓${NC}  $1";   }
+print_warning() { echo -e "${YELLOW}⚠${NC}  $1"; }
+print_error()   { echo -e "${RED}✗${NC}  $1";     }
+print_item()    { echo -e "  ${GREEN}•${NC} $1"; }
 line() {
     printf '%*s\r' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
     echo -e "${GREEN}[$1] ${NC}"
@@ -28,16 +29,21 @@ line() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Banner
-echo -e "${GREEN}[ The KeyMaker firmware installer ]"
+echo -e "${GREEN}[ The KeyMaker firmware installer ]${NC}"
 line " ESP32 OTP Authenticator         "
 echo -e "\nThis script will:"
-print_success "Create or activate a python virtualenv within this dir ($(pwd))"
-print_success "Install required python pip packages (see requirements.txt)"
-print_success "Flash your CYD display with newly installed esptool.py"
-echo -en "\npress any key to continue, Ctrl+C to exit..."; read -n1 junk
-exit 0
+print_item "Create or activate a python virtualenv within this dir:\n      $(pwd)/venv"
+print_item "Install required python pip packages in it (see requirements.txt)"
+print_item "Autodetect CYD ESP32 device connected to your USB port\n      Otherwise use '$0 <port>' to override it"
+print_item "Detect device configuration and ask confirmation before flashing"
+print_item "Flash your CYD display with newly installed esptool.py from virtualenv"
+echo ""
+print_info "Upgrading to the latest version of Keymaker will not affect your"
+echo "   existing configuration data (no user data change, firmware update only)"
+echo -en "\npress any key to continue, Ctrl+C to exit..."; read -n1 junk; echo -e "\n"
 
 # Setup Python environment
+line "Environment setup"
 print_info "Setting up Python environment..."
 
 # Check if virtualenv exists in the distribution
@@ -98,7 +104,6 @@ print_success "esptool.py found: $(which esptool.py)"
 # Check firmware files
 print_info "Checking firmware files..."
 BUILD_DIR="${SCRIPT_DIR}/build"
-
 BOOTLOADER="${BUILD_DIR}/bootloader/bootloader.bin"
 PARTITION="${BUILD_DIR}/partition_table/partition-table.bin"
 FIRMWARE="${BUILD_DIR}/keymaker.bin"
@@ -116,7 +121,6 @@ if [ ! -f "$FIRMWARE" ]; then
     print_error "Firmware not found: $FIRMWARE"
     MISSING_FILES=1
 fi
-
 if [ $MISSING_FILES -eq 1 ]; then
     echo ""
     print_error "Missing firmware files! Please ensure all .bin files are in the build directory."
@@ -126,7 +130,6 @@ print_success "All firmware files found"
 
 # Detect or ask for USB port
 print_info "Detecting ESP32 device..."
-
 PORT=""
 if [ -n "$1" ]; then
     # Port provided as argument
@@ -148,7 +151,6 @@ else
 
     # Count available ports
     PORT_COUNT=$(echo "$POSSIBLE_PORTS" | grep -c "/dev/" || echo "0")
-
     if [ "$PORT_COUNT" -eq 0 ]; then
         print_warning "No USB serial device detected automatically."
         echo ""
@@ -193,16 +195,13 @@ fi
 
 # Confirmation
 echo ""
-print_warning "Ready to flash firmware to $PORT"
-echo ""
+line "Ready to flash firmware to $PORT"
 echo "This will:"
-echo "  • Erase the current firmware"
-echo "  • Flash bootloader at 0x1000"
-echo "  • Flash partition table at 0x8000"
-echo "  • Flash Keymaker firmware at 0x10000"
-echo ""
-read -p "Continue? [y/N] " -n 1 -r
-echo ""
+print_item "Erase the current firmware"
+print_item "Flash bootloader at 0x1000"
+print_item "Flash partition table at 0x8000"
+print_item "Flash Keymaker firmware at 0x10000"
+echo ""; read -p "Do you want to continue? [y/N] " -n 1 -r; echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     print_info "Aborted by user"
     exit 0
@@ -211,7 +210,6 @@ fi
 # Flash firmware
 print_info "Flashing firmware..."
 echo ""
-
 esptool.py \
     --chip esp32 \
     --port "$PORT" \
@@ -228,10 +226,9 @@ esptool.py \
 
 # Success
 echo ""
-print_success "Firmware flashed successfully!"
-echo ""
+line "Firmware flashed successfully"
 print_info "Your Keymaker device should now be rebooting..."
 print_info "You can monitor the serial output with:"
-echo "  esptool.py --port $PORT monitor"
+echo "      esptool.py --port $PORT monitor"
 echo ""
-echo -e "${BLUE}Thank you for using Keymaker!${NC}"
+echo -e "${BLUE}Thank you for using TheKeymaker${NC}\n"
