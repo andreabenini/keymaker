@@ -3,3 +3,28 @@
 # Keymaker - ESP32 OTP Authenticator
 A two-factor authentication application for ESP32 (CYD - Cheap Yellow Display) using one-time password protocols.
 
+## Quick Start
+
+```bash
+# Setup environment, adapt it to your current path
+. $HOME/.espressif/v5.5.3/esp-idf/export.sh
+
+# Build and flash
+idf.py build
+idf.py -p /dev/ttyUSB0 flash monitor
+```
+
+
+
+## Support the Project
+This project is open-source and free to use. However, maintaining the codebase, fixing bugs, and
+developing new features requires a significant investment of time and effort.  
+If this tool has saved you time, solved a problem, or helped your business, please consider supporting
+its continued development. Your contributions help ensure the project remains active and sustainable!
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/andreabenini)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/bendonations)
+#### Other ways to help
+- **Star the repo** to help others find the project
+- **Open an issue** if you find a bug or have a feature request
+- **Spread the word** by sharing the project with your network
