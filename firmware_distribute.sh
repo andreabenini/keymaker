@@ -55,6 +55,7 @@ chmod +x "${DIST_DIR}/install.sh"
 print_info "Copying documentation..."
 cp "${SCRIPT_DIR}/contrib/INSTALL.md" "${DIST_DIR}/"
 cp "${SCRIPT_DIR}/README.md" "${DIST_DIR}/"
+cp "${SCRIPT_DIR}/CHANGELOG.md" "${DIST_DIR}/"
 [ -f "${SCRIPT_DIR}/LICENSE" ] && cp "${SCRIPT_DIR}/LICENSE" "${DIST_DIR}/"
 
 # Create a quick start guide
