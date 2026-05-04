@@ -85,3 +85,20 @@ lv_color_hex(0xFFFF00) → Yellow     ✓
 lv_color_hex(0x00FFFF) → Cyan       ✓
 lv_color_hex(0xFF00FF) → Magenta    ✓
 ```
+
+
+## What I Tried (and didn't work)
+| Setting                         | Result                      |
+|---------------------------------|-----------------------------|
+| BGR order + no invert + no swap | Red/Blue swapped            |
+| RGB order + no swap             | Red/Blue swapped            |
+| BGR order + invert              | Light background (inverted) |
+| RGB order + invert + swap       | Light background (inverted) |
+**Final Solution**: RGB + no invert + byte swap
+
+
+
+
+**Last verified**: 2026-03-19  
+**ESP-IDF version**: 5.5.3  
+**LVGL version**: 8.4.0
