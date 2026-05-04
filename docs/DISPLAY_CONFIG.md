@@ -98,6 +98,53 @@ lv_color_hex(0xFF00FF) → Magenta    ✓
 
 
 
+## How to Recreate This Setup
+1. **Ensure correct sdkconfig settings**
+   ```sh
+   grep LV_COLOR_16_SWAP sdkconfig
+   # Should show: CONFIG_LV_COLOR_16_SWAP=y
+   ```
+2. **Verify display init in `main.c`**
+   - RGB order (not BGR)
+   - No color inversion
+   - Mirror X enabled
+3. **Test with simple colors first**
+   - Black background
+   - White/colored text
+   - Verify no color swapping
+4. **If colors are wrong**
+   - Red↔Blue swapped? Toggle `LV_COLOR_16_SWAP`
+   - Light when should be dark? Toggle `invert_color`
+   - Try RGB vs BGR order
+
+
+## Quick Troubleshooting
+**Problem: Colors are swapped (red appears blue)**  
+_**Solution**: Toggle `CONFIG_LV_COLOR_16_SWAP` in sdkconfig_
+
+**Problem: Background is inverted (light when should be dark)**  
+_**Solution**: Toggle `esp_lcd_panel_invert_color()` setting_
+
+**Problem: Touch not responding**  
+_**Solution**: Check touch SPI bus (different from display)_
+
+**Problem: Touch coordinates wrong**  
+_**Solution**: Adjust `swap_xy`, `mirror_x`, `mirror_y` flags_
+
+
+## Reference Hardware
+Based on CYD (Cheap Yellow Display)
+- **MCU**: ESP32-WROOM-32
+- **Display**: 2.8" ILI9341 (320x240, SPI)
+- **Touch**: XPT2046 (resistive, SPI)
+- **Additional**: SD card, RGB LED, LDR
+
+
+## Notes
+- The display requires **two separate SPI buses** (SPI2 for LCD, SPI3 for touch)
+- LVGL byte swap is required due to how the ILI9341 expects RGB565 data
+- Pin configuration matches the CYD hardware exactly
+- Black background (#000000) works best for this display
 
 **Last verified**: 2026-03-19  
 **ESP-IDF version**: 5.5.3  
