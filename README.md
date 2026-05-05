@@ -14,6 +14,12 @@ idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
+## License
+Keymaker is dual-licensed:
+1. **Open Source:** For hobbyists, makers, and open-source projects, it is available under the **GNU General Public License v3.0 (GPLv3)**.
+2. **Commercial:** For hardware vendors, sellers, or corporate integrations where GPLv3 compliance is not possible (e.g., closed-source proprietary products), a **Commercial License** IS required.
+
+Please contact the creator of this repository [andreabenini] to discuss commercial licensing or to purchase a royalty-free license for your hardware.
 
 
 ## Support the Project
