@@ -19,4 +19,10 @@
 - ### Flash to Device
    - **Ctrl+Shift+P** → "Tasks: Run Task" → "Flash - ESP-IDF"
    - Or use the ESP-IDF extension flash button
+- ### Monitor Serial Output
+   - **Ctrl+Shift+P** → "Tasks: Run Task" → "Monitor - ESP-IDF"
+   - Or use the ESP-IDF extension monitor button
+   - **To exit**: Press Ctrl+]
+- ### All-in-One: Build, Flash, Monitor
+   - **Ctrl+Shift+P** → "Tasks: Run Task" → "Build, Flash and Monitor"
 
