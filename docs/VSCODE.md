@@ -102,3 +102,21 @@ Your `launch.json` is configured for OpenOCD debugging.
 3. Set breakpoints by clicking left of line numbers
 
 
+## Troubleshooting
+### IntelliSense shows errors but builds fine
+- **Solution**: Reload window (Ctrl+Shift+P → "Reload Window")
+- Check that `build/compile_commands.json` exists
+- Make sure "ESP-IDF" configuration is selected
+
+### Build task fails
+- **Check**: Terminal shows "idf.py: command not found"
+- **Solution**: Tasks auto-source the IDF environment
+- If it still fails, verify `idf.currentSetup` in settings.json
+
+### Port not found
+- **Check**: Device is connected (`ls /dev/ttyUSB*`)
+- **Update**: Change `idf.port` in settings.json if different
+
+### Extension not working
+- **Reinstall**: Remove and reinstall ESP-IDF extension
+- **Check**: Extension requires Python 3.x and ESP-IDF installed
