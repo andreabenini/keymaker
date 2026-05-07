@@ -37,3 +37,17 @@ These settings have been detected during the project creation
     - **IRQ**: GPIO 36
 
 
+## Build Instructions
+```sh
+# Source ESP-IDF environment
+. $HOME/.espressif/v5.5.3/esp-idf/export.sh
+
+# Build
+idf.py build
+# Flash to device
+idf.py -p /dev/ttyUSB0 flash
+# Monitor output
+idf.py -p /dev/ttyUSB0 monitor
+# Or do all in one command
+idf.py -p /dev/ttyUSB0 flash monitor
+```
