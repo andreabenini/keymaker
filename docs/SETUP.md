@@ -51,3 +51,23 @@ idf.py -p /dev/ttyUSB0 monitor
 # Or do all in one command
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
+
+## Troubleshooting
+- **Display not working**
+    - Verify GPIO connections match the pinout above
+    - Check backlight is powered (GPIO 21)
+    - Ensure SPI2 bus is not in use by other peripherals
+- **Touch not responding**
+    - Touch initialization is complete but needs testing
+    - Calibration values from YAML may need adjustment
+    - Use monitor to see touch coordinates in logs
+- **Build errors**
+    - Ensure ESP-IDF 5.5.3 environment is sourced
+    - Run `idf.py fullclean` and rebuild if needed
+    - Check all managed components are downloaded
+
+
+## References
+- **LVGL Documentation**: https://docs.lvgl.io/8.3/
+- **ESP-IDF**: https://docs.espressif.com/projects/esp-idf/
+- **FreeOTP (UI inspiration)**: https://github.com/freeotp/freeotp-android
