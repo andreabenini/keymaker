@@ -13,6 +13,13 @@ A two-factor authentication application for ESP32 (CYD - Cheap Yellow Display) u
 idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
+
+## Hardware
+**Platform**: ESP32-WROOM-32 (CYD - Cheap Yellow Display)
+- **Display**: 2.8" ILI9341 TFT (320x240, SPI)
+- **Touch**: XPT2046 resistive (SPI)
+- **Additional**: MicroSD, RGB LED, LDR
+
 ## Framework
 - **ESP-IDF 5.5.3** (native Espressif framework, no Arduino)
 - **LVGL 8.3** (GUI library)
