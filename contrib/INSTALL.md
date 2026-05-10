@@ -20,6 +20,21 @@ That's it, the installer then will
 - Detect your ESP32 device
 - Flash the firmware
 
+## Detailed guide
+### Prerequisites
+- Python 3  
+  You need Python 3.6 or later installed on your system.  
+  **Check if Python is installed:**
+  ```sh
+   python3 --version
+  ```
+   - **If not installed:**
+      - **Linux (Arch)**: `sudo pacman -Sy python3`
+      - **Linux (SUSE\*)**: `sudo zypper install python3`
+      - **Linux (Debian/Ubuntu)**: `sudo apt install python3 python3-venv`
+      - **Linux (Fedora)**: `sudo dnf install python3`
+      - **macOS**: `brew install python3` (requires [Homebrew](https://brew.sh))
+
 
 ## License
 Keymaker is dual-licensed under GPLv3 for open-source use and commercial licensing
