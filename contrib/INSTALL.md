@@ -35,6 +35,19 @@ That's it, the installer then will
       - **Linux (Fedora)**: `sudo dnf install python3`
       - **macOS**: `brew install python3` (requires [Homebrew](https://brew.sh))
 
+### Installation steps
+- **Download Firmware**  
+   Download the firmware package which contains:
+   - `INSTALL.md`. This detailed guide
+   - `QUICK_START.txt`. Quick reference guide
+   - `install.sh`. Automatic installation script
+   - `requirements.txt`. Python dependencies, held by the installation script
+   - `build/` directory with firmware files
+   - `AUTHORS.md`. Authors information page
+   - `LICENSE`. Project license 
+   - `README.md`. Copy of [main README.md](https://github.com/andreabenini/keymaker/blob/main/README.md) file
+   - `CHANGELOG.md`. Properly formatted project changelog
+   - `VERSION.txt`. Build version and information details
 
 ## License
 Keymaker is dual-licensed under GPLv3 for open-source use and commercial licensing
