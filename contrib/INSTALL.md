@@ -49,6 +49,33 @@ That's it, the installer then will
    - `CHANGELOG.md`. Properly formatted project changelog
    - `VERSION.txt`. Build version and information details
 
+### Connect your ESP32
+1. Connect your ESP32 device to your computer using a USB cable
+2. The device should appear as a serial port:
+   - **Linux**: `/dev/ttyUSB0` or `/dev/ttyACM0`
+   - **macOS**: `/dev/cu.usbserial-*` or similar
+
+### Fix permissions (linux only)
+If you're on Linux, you may need to add yourself to the `dialout|wheel` or similar
+group to access the serial port:
+```sh
+sudo usermod -a -G dialout $USER
+```
+Then log out and log back in for the changes to take effect.
+
+### Run the installer
+**Automatic port detection:**  
+The script will try to automatically detect your ESP32 device.
+```bash
+./install.sh
+```
+**Manual port specification:**  
+Replace `/dev/ttyUSB0` with your actual port.
+```bash
+./install.sh /dev/ttyUSB0
+```
+
+
 ## License
 Keymaker is dual-licensed under GPLv3 for open-source use and commercial licensing
 for proprietary products. See the main [README.md](README.md) for details.
