@@ -11,7 +11,7 @@ The installer now automatically sets up everything for you
 1. **Download and extract** the firmware package
 2. **Connect** your ESP32 via USB
 3. **Run the installer:**
-   ```bash
+   ```sh
    ./install.sh
    ```
 That's it, the installer then will
@@ -56,9 +56,12 @@ That's it, the installer then will
    - **macOS**: `/dev/cu.usbserial-*` or similar
 
 ### Fix permissions (linux only)
-If you're on Linux, you may need to add yourself to the `dialout|wheel` or similar
+If you're on Linux, you may need to add yourself to the `dialout|wheel|uucp` or similar
 group to access the serial port:
 ```sh
+# discover yours by: "ls -la /dev/ttyUSB0" (or whatever device you're using)
+
+# Use your group here, usually: dialout, wheel, uucp
 sudo usermod -a -G dialout $USER
 ```
 Then log out and log back in for the changes to take effect.
@@ -66,13 +69,41 @@ Then log out and log back in for the changes to take effect.
 ### Run the installer
 **Automatic port detection:**  
 The script will try to automatically detect your ESP32 device.
-```bash
+```sh
 ./install.sh
 ```
 **Manual port specification:**  
-Replace `/dev/ttyUSB0` with your actual port.
-```bash
+```sh
+# Replace `/dev/ttyUSB0` with your actual port.
 ./install.sh /dev/ttyUSB0
+```
+
+### Follow the Prompts
+The installer will:
+1. Set up Python **virtual environment** _(first run only)_,
+   this will protect and won't mess up with your system or installed packages
+2. Install esptool automatically (first run only)
+3. Verify all firmware files are present
+4. Detect or ask for the USB port
+5. Read chip information
+6. Ask for confirmation before flashing (obviously)
+7. Flash the firmware (takes about ~30 seconds)
+
+The first run takes a bit longer as it sets up the environment, 
+but subsequent runs are instant.
+
+## Manual Installation (Advanced)
+If you prefer to install dependencies manually:
+```sh
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Manually execute the installer
+./install.sh
 ```
 
 
