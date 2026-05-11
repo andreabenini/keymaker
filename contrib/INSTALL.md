@@ -107,6 +107,35 @@ pip install -r requirements.txt
 ```
 
 
+
+## Monitoring the Device
+After flashing, you can monitor the serial output to see your device boot up:
+```sh
+esptool.py --port /dev/ttyUSB0 monitor
+```
+Press `Ctrl+]` to exit the monitor.
+
+
+## What Gets Flashed?
+The installer flashes three components to your ESP32:
+
+| Component       | Flash Address | Description                        |
+|-----------------|---------------|------------------------------------|
+| Bootloader      |        0x1000 | ESP32 bootloader                   |
+| Partition Table |        0x8000 | Memory layout configuration        |
+| Keymaker App    |       0x10000 | Main OTP authenticator application |
+
+Flash settings:
+- **Mode**: DIO
+- **Frequency**: 40MHz
+- **Size**: 4MB
+
+## Need Help?
+If you encounter issues:
+1. Check the [Troubleshooting](#troubleshooting) section above
+2. Open an issue on GitHub
+3. Make sure your ESP32 is a genuine ESP32-WROOM-32 (CYD compatible)
+
 ## License
 Keymaker is dual-licensed under GPLv3 for open-source use and commercial licensing
 for proprietary products. See the main [README.md](README.md) for details.
