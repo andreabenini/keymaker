@@ -106,7 +106,47 @@ pip install -r requirements.txt
 ./install.sh
 ```
 
+## Troubleshooting
 
+### "Python 3 is not installed"
+- See [Prerequisites](###Prerequisites) section in this page for it
+
+### Virtual environment issues
+If automatic setup fails, try manual installation:
+```sh
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+./install.sh
+```
+
+### "Permission denied" on Linux
+Add yourself to the `dialout|wheel|...` or whatever group your USB port is
+managed by, refer to your linux distribution documentation page and add
+yourself with a command like:
+```sh
+sudo usermod -a -G dialout $USER
+```
+Then log out and log back in.
+
+### "Port does not exist"
+- Make sure the ESP32 is connected via USB
+- Check which port your device is using:
+  - **Linux**: `ls /dev/ttyUSB* /dev/ttyACM*`
+  - **macOS**: `ls /dev/cu.*`
+- Specify the correct port manually: `./install.sh <port>`
+
+### "Failed to communicate with ESP32"
+1. Try pressing and holding the **BOOT** button on the ESP32
+2. While holding BOOT, press the **RESET** button
+3. Release RESET, then release BOOT
+4. Run the installer again
+
+### Multiple USB devices detected
+If you have multiple USB serial devices, specify the correct one:
+```sh
+./install.sh /dev/ttyUSB0
+```
 
 ## Monitoring the Device
 After flashing, you can monitor the serial output to see your device boot up:
