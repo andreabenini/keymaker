@@ -14,6 +14,18 @@ idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
+## Documentation [README.md](https://github.com/andreabenini/keymaker/blob/main/README.md)
+All links are referred from this URL
+- **[Official readme](README.md)** - This document
+- **[Setup Guide](docs/SETUP.md)** - Build instructions, hardware pinout, architecture overview
+- **[Installation guide](contrib/INSTALL.md)** - Installation guide, also distributed in the binary package
+- **[Changelog](CHANGELOG.md)** - Project changelog
+- **[Security recommendations](docs/SECURITY.md)** - Never, ever, take security for granted in a OTP device.
+A deep analysis, project implementations and why you should pick this project among others. Security
+considerations or why you should prefer a FIPS compliant device if you work for a government institution instead.
+- **[Display configuration reference](docs/DISPLAY_CONFIG.md)** - A mess to configure for a starter, a good reference later
+- **[vscode setup](docs/VSCODE.md)** - Nice to have setup guide for VisualStudioCode + Espressif SDK (ESP-IDF)
+
 ## Hardware
 **Platform**: ESP32-WROOM-32 (CYD - Cheap Yellow Display)
 - **Display**: 2.8" ILI9341 TFT (320x240, SPI)
