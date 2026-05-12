@@ -18,3 +18,22 @@ PIN+Salt → PBKDF2 → Derived Key → Decrypts NVS
 An attacker **cannot bypass** the PIN because without it, NVS remains encrypted garbage
 
 
+## Understanding the threat
+### How encryption works
+**Current implementation:**
+1. User sets PIN on first boot, up to 10 digits
+2. Random _salt_ generated and stored in NVS (unencrypted)
+3. PIN + Salt → PBKDF2(100k iterations) → 256-bit key
+4. Key encrypts OTP secrets in NVS
+5. Verification blob (encrypted known string) stored to validate PIN
+
+**On unlock:**
+1. User enters PIN
+2. Load salt from NVS
+3. PIN + Salt → PBKDF2 → Derived Key
+4. Try to decrypt verification blob
+5. If successful → PIN is correct, use key to decrypt OTP secrets
+
+**Key insight:** Without correct PIN, attacker has no key. NVS stays encrypted.
+
+
