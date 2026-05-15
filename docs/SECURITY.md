@@ -71,3 +71,37 @@ An attacker **cannot bypass** the PIN because without it, NVS remains encrypted 
 - Offline attack (take flash, dump home)
 - Parallelizable on GPU farm
 - Limited only by PBKDF2 iteration count
+
+
+### Attack Scenario 2: Online Brute Force (Modified Firmware)
+---
+**Prerequisites:** Attacker modifies firmware and flashes device  
+**What attacker CANNOT do:**
+- "Skip" PIN screen (still need PIN to derive key)
+- Extract key from firmware (key is derived, not stored)
+
+**What attacker CAN do:**
+- Add serial input instead of touchscreen
+- Automate PIN attempts: `for pin in 0000000000..9999999999: try_decrypt(pin)`
+- Remove UI delays
+
+**Time on ESP32:**
+- PBKDF2 Iterations
+   - Keyspace: 10,000,000,000 combinations (10 billion)                                                                                                                                                                                    
+   -  | PBKDF2 Iterations | Time per PIN | Total Time to Brute Force
+      |-------------------|--------------|----------------------------
+      | 100k              | ~100ms       | 31.7 years
+      | 500k              | ~500ms       | 158.5 years
+      | 1M                | ~1000ms      | 317 years
+   - Bottom line: With a 10-digit PIN and flash encryption enabled, brute force on the
+      ESP32 itself is completely impractical (decades to centuries).
+
+**Why this is SLOWER than offline:**
+- Limited by ESP32 CPU (160MHz vs GPU GHz)
+- Serial, not parallel
+- Still requires PBKDF2 computation per attempt
+
+**The Problem:** Without **flash encryption** + **secure boot**,
+attacker can dump flash and brute force offline with GPU.
+
+
