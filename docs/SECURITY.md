@@ -37,3 +37,37 @@ An attacker **cannot bypass** the PIN because without it, NVS remains encrypted 
 **Key insight:** Without correct PIN, attacker has no key. NVS stays encrypted.
 
 
+### Attack Scenario 1: Offline Brute Force (Dumped Flash)
+**Prerequisites:** Attacker dumps flash with `esptool.py`
+
+**Attack steps:**
+1. Extract from flash dump: Salt + Encrypted verification blob
+2. For each PIN candidate (0000000000 to 9999999999):
+   - PIN + Salt → PBKDF2(100k) → Candidate Key
+   - Try decrypt verification blob with candidate key
+   - If decrypts to "KEYMAKER_VERIFIED" → PIN found!
+3. Use found PIN to derive real key and decrypt all OTP secrets
+
+**Time for a 10-digit PIN on consumer CPU (desktop pc)**
+- Keyspace: 10^10 = 10,000,000,000 combinations (10 billion)
+- CPU Performance (i5~7-8400 or similar, 6~8 cores):
+- ~1000 PBKDF2 operations/second (parallelized across cores)
+- Brute Force Time:
+   | PBKDF2 Iterations | PINs/second | Time to Crack 10-digit
+   |-------------------|-------------|--------------------------
+   | 100k              | ~1000       | 116 days (~4 months)
+   | 500k              | ~200        | 578 days (~1.6 years)
+   | 1M                | ~100        | 1,157 days (~3.2 years)
+- With flash encryption enabled (must brute force on ESP32):
+  - ESP32: ~10 PINs/second (100k PBKDF2)
+  - 10 billion / 10 = 1 billion seconds = **~31.7 years**
+- Bottom line for 10-digit PIN:
+  - Even CPU-only (no GPU) takes months to years
+  - With flash encryption: impractical _(decades on ESP32)_
+  - 10-digit + 500k PBKDF2 + flash encryption = essentially uncrackable
+
+**Why this is the PRIMARY threat**
+- No firmware modification needed
+- Offline attack (take flash, dump home)
+- Parallelizable on GPU farm
+- Limited only by PBKDF2 iteration count
