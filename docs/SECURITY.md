@@ -197,3 +197,42 @@ This is the **only way** to actually protect against offline brute force attacks
 - Only attack remaining: Online brute force via touchscreen (~27+ hours for 6-digit PIN)
 - This is the closest to TPM security without external hardware
 
+### B1. Enable Flash Encryption
+**WARNING:** This is _**IRREVERSIBLE**_. Test on spare device first.  
+**Configuration changes**, no source code changes needed:
+- Pick **Option 1** _or_ **Option 2**, not both
+- **Option 1: `menuconfig`**
+   ```sh
+      idf.py menuconfig
+      # Navigate to: Security features
+      #   → Enable flash encryption on boot: YES
+      #   → Enable usage mode: Release
+      #   → Size of generated AES-XTS key: AES-256
+   ```
+- **Option 2: Edit `sdkconfig` directly**
+   ```ini
+      CONFIG_SECURE_FLASH_ENC_ENABLED=y
+      CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE=y
+      CONFIG_SECURE_FLASH_ENCRYPTION_AES256=y
+   ```
+- **First flash**
+   ```sh
+      idf.py build flash
+      # On first boot, ESP32 will:
+      # 1. Generate random 256-bit key
+      # 2. Burn key to eFuse (irreversible!)
+      # 3. Encrypt entire flash
+      # 4. Reboot
+      # This takes ~1 minute
+   ```
+- **Future updates**
+   ```sh
+      # Same command, ESP32 encrypts on-the-fly
+      idf.py build flash
+   ```
+- **What you get**
+   - [x] Dumping flash with `esptool.py` gives encrypted garbage
+   - [x] No code changes required (transparent to application)
+   - [x] NVS is encrypted, OTP secrets are protected
+   - [ ] Cannot revert (eFuse is **permanent**)
+   - [ ] Cannot read flash externally for debugging
