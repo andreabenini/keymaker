@@ -236,3 +236,40 @@ This is the **only way** to actually protect against offline brute force attacks
    - [x] NVS is encrypted, OTP secrets are protected
    - [ ] Cannot revert (eFuse is **permanent**)
    - [ ] Cannot read flash externally for debugging
+
+### B2. Enable Secure Boot V2
+**Configuration changes** (no code changes needed):
+- Pick **Option 1** _or_ **Option 2**, not both
+- **Option 1: `menuconfig`**
+   ```sh
+      idf.py menuconfig
+      # Security features
+      #   → Enable hardware Secure Boot in bootloader: YES
+      #   → Secure Boot Version: Secure Boot V2
+      #   → Sign binaries during build: YES
+   ```
+- **Option 2: Edit `sdkconfig` directly**
+   ```ini
+      CONFIG_SECURE_BOOT=y
+      CONFIG_SECURE_BOOT_V2_ENABLED=y
+      CONFIG_SECURE_BOOT_BUILD_SIGNED_BINARIES=y
+   ```
+- **Generate signing key _(ONE TIME)_**
+   ```sh
+      # Keep this KEY SECRET!
+      espsecure.py generate_signing_key --version 2 secure_boot_signing_key.pem
+      # Store securely (NOT IN GIT PLEASE !)
+      # If lost device cannot be updated
+   ```
+- **Build and flash**
+   ```sh
+      idf.py build flash
+      # Firmware is automatically signed during build
+      # On first boot: public key hash burned to eFuse
+   ```
+- **What you get**
+   - [x] Only signed firmware will run
+   - [x] Attacker cannot flash modified firmware, at all
+   - [x] Works together with flash encryption
+   - [ ] Requires secure key management
+   - [ ] Cannot downgrade firmware easily
