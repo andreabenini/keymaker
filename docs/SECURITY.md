@@ -105,3 +105,67 @@ An attacker **cannot bypass** the PIN because without it, NVS remains encrypted 
 attacker can dump flash and brute force offline with GPU.
 
 
+## Two Paths Forward
+#### Path A: Basic Protection **(Software Only)**
+- **Good for:** Casual theft, lost device, non-technical attackers
+- **Won't stop:** Anyone with ESP32 knowledge and USB cable
+   _(but also with many compute-time YEARS at their disposal)_
+
+#### Path B: Hardware Security **(Flash Encryption + Secure Boot)**
+- **Good for:** Targeted attacks, high-value secrets, sophisticated adversaries
+- **Won't stop:** Nation-state actors, advanced lab attacks. Same procedure valid
+   for other operating systems (Android, MacOS, Win)
+- **Trade-off:** Irreversible eFuse changes, encrypted flash forever
+
+### Path A: Software-Only Protection
+Without flash encryption, attacker can dump flash and brute force offline.  
+These mitigations only slow down the attack.
+#### A1. Increase PBKDF2 Iterations (MOST IMPORTANT)
+- **Current:** 100,000 iterations (~100ms unlock time)
+- **Recommended:** 500,000 - 1,000,000 iterations
+- **Change in `main/crypto.h`:**
+   ```c
+   // Option 1: 500k iterations (~500ms unlock)
+   #define CRYPTO_PBKDF2_ITERATIONS 500000
+   // Option 2: 1M iterations (~1000ms unlock)
+   #define CRYPTO_PBKDF2_ITERATIONS 1000000
+   ```
+- **Impact on brute force:**
+   | Iterations | Unlock Time |  GPU Crack Time       (10-digit) | Benefit |
+   |------------|-------------|----------------------------------|---------|
+   |       100k |       100ms |    69-416 days    (~2-14 months) |  Months |
+   |       500k |       500ms | 347-2,083 days    (~1-5.7 years) |   Years |
+   |         1M |      1000ms | 694-4,166 days (~1.9-11.4 years) | ~Decade |
+- **Reality check:**
+- [x] Actually slows down offline brute force
+- [x] Cannot be bypassed (PBKDF2 is required to derive key)
+- [ ] Still crackable, just takes longer (much longer)
+- [ ] User experiences slower unlock
+
+**This is the ONLY software mitigation that actually matters**  
+because it directly affects the cryptographic key derivation.
+
+#### A2. PIN Strength Validation (Minor Impact)
+- **Purpose:** Reduce effective keyspace by blocking weak PINs
+- **Enforcement during PIN setup**
+   - Minimum 8 digits (better: 10 digits)
+   - Block sequential (123456, 654321)
+   - Block repeated (111111, 000000)
+   - Block common PINs (000000, 123123, etc.)
+- **Reality check:**
+   - Forces users to choose stronger PINs
+   - 10M combinations for 10 digits (exclude weak PINs blocked)
+   - Doesn't slow down brute force if attacker tries all combinations anyway
+#### A3. Exponential Backoff (Minimal Impact)
+- **Purpose:** Slow down online brute force on the device itself
+- **Implementation**
+   - Track failed attempts in NVS
+   - Add incremental delays: 0s → 2s → 5s → 15s → 60s → 300s (5min)
+   - Countdown on screen
+- **Reality check:**
+   - [x] Stops casual user trying PINs manually on touchscreen
+   - [ ] Irrelevant for offline attack (attacker dumps flash, cracks at home)
+   - [ ] Can be removed via firmware modification
+   - [x] Online brute force on ESP32 takes days anyway (~100ms/PIN)
+
+
