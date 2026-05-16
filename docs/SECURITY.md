@@ -169,3 +169,31 @@ because it directly affects the cryptographic key derivation.
    - [x] Online brute force on ESP32 takes days anyway (~100ms/PIN)
 
 
+## Path B: Hardware Security (HIGHLY RECOMMENDED)
+This is the **only way** to actually protect against offline brute force attacks.
+#### Why This Works and current _"ipotethical"_ vulnerability:
+1. Attacker dumps flash with esptool.py → Gets Salt + Encrypted NVS
+2. Takes flash dump home
+3. Brute force offline with GPU: Try all PINs, each with PBKDF2 → Key → Decrypt
+4. Find correct PIN in hours/days/months (still, good luck with that)
+5. Derive key and decrypt all OTP secrets
+#### Flash Encryption Prevents Step 1
+- ESP32 generates random 256-bit key in eFuse (cannot be read out)
+- Entire flash encrypted with AES-256-XTS using eFuse key
+- When attackers dumps flash they get encrypted garbage
+- Salt is encrypted, verification blob is encrypted, NVS is encrypted
+- **Without eFuse key, the dump is useless**
+- Attacker cannot extract salt or verification blob to attempt brute force
+#### Secure Boot V2 Prevents Firmware Modification
+- Only runs firmware signed with your private key
+- Public key hash burned to eFuse on first boot
+- Attacker cannot flash modified firmware to:
+  - Extract decrypted data from RAM
+  - Add debug logging to capture PIN
+  - Optimize brute force code
+#### Together
+- Attacker cannot dump secrets (flash is encrypted)
+- Attacker cannot modify firmware (secure boot blocks it)
+- Only attack remaining: Online brute force via touchscreen (~27+ hours for 6-digit PIN)
+- This is the closest to TPM security without external hardware
+
