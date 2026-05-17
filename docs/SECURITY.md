@@ -327,3 +327,50 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - Adding simple rate limiting makes it impractical (years)
    - This assumes attacker can fully automate the attack
    - Touchscreen input is very slow and error-prone
+
+## Step-by-Step Implementation (Path B)
+- Step 1: Test on Spare Device First  
+   **Never test on production device**, eFuse burning is irreversible.
+- Step 2: Enable Flash Encryption
+   ```sh
+      # Edit sdkconfig
+      CONFIG_SECURE_FLASH_ENC_ENABLED=y
+      CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE=y
+      # Build and flash
+      . $IDF_PATH/export.sh
+      idf.py build flash monitor
+
+      # Watch boot logs for:
+      # "flash encryption mode is DEVELOPMENT"
+      # "Enabled flash encryption in RELEASE mode"
+   ```
+- **Verification:**
+   ```sh
+      # Try to dump flash
+      esptool.py -p /dev/ttyUSB0 read_flash 0 0x400000 dump.bin
+      # View dump - should be encrypted garbage, not readable text
+      hexdump -C dump.bin | head -20
+   ```
+- Step 3: Enable Secure Boot
+   ```sh
+      # Generate signing key (KEEP IT SECRET !!!)
+      espsecure.py generate_signing_key --version 2 secure_boot_key.pem
+      # Edit sdkconfig
+      CONFIG_SECURE_BOOT=y
+      CONFIG_SECURE_BOOT_V2_ENABLED=y
+      # Build and flash
+      idf.py build flash monitor
+   ```
+- **Verification:**
+   ```sh
+      # Try to flash unsigned firmware - should fail
+      # Try to modify and flash - should reject
+   ```
+- Step 4: Test Normal Operation
+   - Device boots normally
+   - PIN entry works
+   - OTP generation works (when implemented)
+   - Can still update firmware via `idf.py flash`
+   - Flash dump is unreadable
+
+
