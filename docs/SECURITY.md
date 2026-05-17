@@ -273,3 +273,57 @@ This is the **only way** to actually protect against offline brute force attacks
    - [x] Works together with flash encryption
    - [ ] Requires secure key management
    - [ ] Cannot downgrade firmware easily
+
+### B3. Codebase Impact
+- **NO code changes needed**
+- Flash via USB only
+- Encryption/signing happens automatically during `idf.py flash`
+
+### B4. Additional eFuse Security Flags
+When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets these eFuses
+- **Automatically set by ESP-IDF:**
+   ```
+   FLASH_CRYPT_CNT        - Enables flash encryption (cannot revert)
+   FLASH_CRYPT_CONFIG     - AES-256 encryption configuration
+   DISABLE_DL_ENCRYPT     - Prevents encrypting data in download mode
+   DISABLE_DL_DECRYPT     - Prevents decrypting data in download mode
+   DISABLE_DL_CACHE       - Disables flash cache in download mode
+   ```
+- **These prevents**
+   - Reading flash in plaintext via UART download mode
+   - Writing unencrypted data and reading it back
+   - Using download mode to bypass flash encryption
+- **Optional additional hardening _(manual eFuse burn)_:**  
+   Take extra care and execute it only if you know what you're doing
+   - Disable JTAG debugging in production:
+      ```sh
+         # Permanently disable JTAG (cannot undo!)
+         espefuse.py --port /dev/ttyUSB0 burn_efuse JTAG_DISABLE
+         # Check current eFuse state
+         espefuse.py --port /dev/ttyUSB0 summary
+      ```
+   - **JTAG disable prevents:**
+   - Debugging via JTAG/OpenOCD
+   - Reading RAM contents during operation
+   - Setting breakpoints to capture decrypted secrets
+- **Trade-off**
+   - Prevents hardware debugging attacks
+   - Makes development/troubleshooting impossible (in production ? makes sense)
+   - **Only do this on production devices, NOT development units**
+- **Other security eFuses to consider:**
+   ```sh
+      # Disable ROM BASIC console (prevents some glitching attacks)
+      espefuse.py burn_efuse CONSOLE_DEBUG_DISABLE
+      # Secure boot digest (automatically set when enabling secure boot)
+      espefuse.py burn_key secure_boot_v2 secure_boot_key.pem
+      # Check what's currently burned
+      espefuse.py summary
+   ```
+- **Recommendation:**
+   - Development devices: Keep JTAG enabled for debugging
+   - Production devices: Burn `JTAG_DISABLE` after full testing
+- **Reality check**, see table above
+   - Most attackers won't spend 10+ days/months/years brute forcing
+   - Adding simple rate limiting makes it impractical (years)
+   - This assumes attacker can fully automate the attack
+   - Touchscreen input is very slow and error-prone
