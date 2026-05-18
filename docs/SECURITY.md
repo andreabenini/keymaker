@@ -374,3 +374,18 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - Flash dump is unreadable
 
 
+## Recommended Strategy
+- For Maximum Security  
+   **Path B (Flash Encryption + Secure Boot)**
+   - Protects against firmware modification
+   - Protects against flash dumping
+   - No code changes needed for your static firmware use case
+   - Trade-off: Irreversible eFuse changes
+- For Basic Protection  
+   **Path A (Software Only)**
+   - Easier to implement and test
+   - Helps against casual attacks
+   - Can be bypassed by sophisticated attackers
+   - Good starting point before committing to eFuse
+
+
