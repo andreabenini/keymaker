@@ -404,3 +404,21 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - Cannot flash modified firmware
    - PIN entry still works
    - NVS data is encrypted
+
+
+## What About TPM?
+- **ESP32, even without external TPM, can provide**
+   - Flash encryption (via eFuse)
+   - Secure boot (via eFuse)
+   - Hardware RNG
+   - Hardware crypto acceleration
+- **ESP32 CANNOT provide without TPM**
+   - Hardware-enforced attempt counters that survive firmware replacement
+   - Secure enclave for key operations
+   - Remote attestation
+   - Guaranteed monotonic counters
+- **Bottom line:** For an OTP authenticator, ESP32's eFuse-based security is 
+   sufficient. The combination of flash encryption + secure boot makes it
+   equivalent to ~80% of a TPM for this specific use case.
+
+
