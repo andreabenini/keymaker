@@ -389,3 +389,18 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - Good starting point before committing to eFuse
 
 
+## Testing Checklist
+- **After enabling flash encryption**
+   - Boot and verify PIN screen appears
+   - Dump flash with esptool.py, verify it's encrypted
+   - Can still flash updates with `idf.py flash`
+   - Device works normally
+- **After enabling secure boot**
+   - Device boots with signed firmware
+   - Unsigned firmware is rejected
+   - Can still update with signed builds
+- **Security validation**
+   - Flash dump is unreadable
+   - Cannot flash modified firmware
+   - PIN entry still works
+   - NVS data is encrypted
