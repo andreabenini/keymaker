@@ -422,3 +422,42 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    equivalent to ~80% of a TPM for this specific use case.
 
 
+## Summary: What Actually Protects You
+- **Current Security Model**  
+   **Key insight:** The PIN IS the key material.
+   Without correct PIN, NVS cannot be decrypted.
+   ```
+   PIN (user knows) + Salt (stored in flash)  -->  PBKDF2  -->  Key  -->  Decrypt NVS
+   ```
+- **The Real Threat**  
+   **Offline brute force** - Attacker dumps flash, extracts salt/verification blob,
+   brute forces on GPU at home.
+- Mitigations Ranked by Effectiveness
+   - **Flash Encryption (CRITICAL)**
+      - Prevents dumping salt/verification blob
+      - Makes offline GPU attack impossible
+      - Configuration only, no code changes
+      - Irreversible (eFuse burning)
+   - **Increase PBKDF2 Iterations (IMPORTANT)**
+      - Slows down brute force (offline and online)
+      - 500k-1M iterations recommended
+      - Change one line in `crypto.h`
+      - Trade-off: Slower unlock (0.5-1 second)
+   - **Secure Boot V2 (DEFENSE IN DEPTH)**
+      - Prevents firmware modification attacks
+      - Blocks attacker from optimizing brute force
+      - Configuration + key management
+      - Works best with flash encryption
+   - **PIN Strength Validation (MINOR)**
+      - Reduces keyspace slightly
+      - Easy to implement
+      - Marginal security benefit
+   - **Exponential Backoff (COSMETIC)**
+      - Only helps against touchscreen attacks
+      - Irrelevant for offline attacks
+      - Can be removed via firmware modification
+      - Low priority
+- Bottom Line  
+   - **Without flash encryption:** Device is vulnerable to offline GPU brute force (hours/days/weeks to crack)
+   - **With flash encryption + 1M PBKDF2 iterations:** Attacker must brute force on-device via touchscreen, taking weeks/months/years
+   - **With flash encryption + secure boot + 1M PBKDF2:** It's like a ~80% of TPM-level security for this use case (in a 8/10$ device)
