@@ -482,3 +482,22 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - Does not protect against phishing
    - User must verify website authenticity
 
+**Threat Model Decision Tree**, what are you protecting
+- Personal accounts (email, social media)
+   - Path A: Software-only + 500k PBKDF2
+      - Easy to test and modify
+      - Good enough for most users
+- High-value accounts
+   - Path B: Flash encryption + Secure boot + 1M PBKDF2
+      - Maximum security
+      - Test thoroughly first
+- Government / Classified systems
+   - Don't use this project
+   - Don't use Yubikey "classic", "Bio" / VeriMark / ...
+   - FIPS certified hardware is mandatory, Yubikey 5 FIPS is the bare minimum
+   - Need external TPM/HSM
+   - Regulatory compliance required, pick your favorite (and a political party too)
+   - Custom device with ASICs ?  
+      If you already work for a three letter government agencies (pick your favorite)
+      you probably already know the device and you can suggest it to me :)
+
