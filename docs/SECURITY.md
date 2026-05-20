@@ -461,3 +461,24 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
    - **Without flash encryption:** Device is vulnerable to offline GPU brute force (hours/days/weeks to crack)
    - **With flash encryption + 1M PBKDF2 iterations:** Attacker must brute force on-device via touchscreen, taking weeks/months/years
    - **With flash encryption + secure boot + 1M PBKDF2:** It's like a ~80% of TPM-level security for this use case (in a 8/10$ device)
+
+
+## Additional Security Considerations
+**What users MUST understand:**
+1. PIN is UNRECOVERABLE
+   - Forgotten PIN = permanent data loss
+   - No "reset" or "recovery" option
+   - Choose memorable but strong PIN
+2. Device failure = data loss
+   - Hardware can fail
+   - Keep backup codes from services
+   - Consider backup strategy
+3. Physical security matters
+   - Don't leave device unattended in hostile environments (as for your home/car keys...)
+   - Attacker with days/months/years of access can brute force
+   - Enable flash encryption before storing real secrets
+4. This is NOT a password manager
+   - Only stores OTP seeds
+   - Does not protect against phishing
+   - User must verify website authenticity
+
