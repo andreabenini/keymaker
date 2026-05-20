@@ -511,3 +511,13 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
 - **Make a donation** to support the project, I'm trying to keep the pace and a reasonably
 updated documentation too. This takes a lot of time and your support always helps
 
+
+## References
+- [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2), [AES-256](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard),
+  do the Math with them
+- [ESP32 Flash Encryption Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html)
+- [ESP32 Secure Boot V2 Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/secure-boot-v2.html)
+- [ESP32 Security Features Overview](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/index.html)
+- [PBKDF2 Specification (RFC 2898)](https://www.rfc-editor.org/rfc/rfc2898)
+- [OWASP Embedded Security](https://owasp.org/www-project-embedded-application-security/)
+- [NIST SP 800-63B - Authentication Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html)
