@@ -501,3 +501,13 @@ When flash encryption is enabled in **RELEASE mode**, ESP-IDF automatically sets
       If you already work for a three letter government agencies (pick your favorite)
       you probably already know the device and you can suggest it to me :)
 
+**Future proof**
+- PBKDF2 is mature (2000) but still recommended by NIST
+- AES-256 is **quantum-resistant** for symmetric encryption
+- Consider migration to Argon2 in future (memory-hard KDF)
+- Review security annually
+- Monitor ESP-IDF security advisories
+- Update firmware when patches released
+- **Make a donation** to support the project, I'm trying to keep the pace and a reasonably
+updated documentation too. This takes a lot of time and your support always helps
+
