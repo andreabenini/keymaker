@@ -1,14 +1,34 @@
 #!/bin/bash
 #
-#   Populate distribution directory 'dist' and create firmware package for CYD
-#   Prepares the dist/ directory with firmware and installer for easy distribution
+# The Keymaker - ESP32 CYD OTP Authenticator
+# Copyright (C) 2026 Andrea Benini
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#   Usage:
-#       ./firmware_distribute.sh            # Create installer based on latest tag or git commit
-#       ./firmware_distribute.sh [version]  # Explicitly create an installer based on <version>
+# COMMERCIAL USAGE: If you wish to use this software in a commercial 
+# product or environment where GPLv3 compliance is not possible, 
+# please contact the creator of this repository [andreabenini] @ gmail
+# for a commercial license.
 #
-#   <version> might also be a free text string and not tied to anything in specific
 #
+#
+# Populate distribution directory 'dist' and create firmware package for CYD
+# Prepares the dist/ directory with firmware and installer for easy distribution
+# 
+# Usage:
+#     ./firmware_distribute.sh            # Create installer based on latest tag or git commit
+#     ./firmware_distribute.sh [version]  # Explicitly create an installer based on <version>
+# 
+# <version> might also be a free text string and not tied to anything in specific
+# 
 set -e
 
 # Colors for output
