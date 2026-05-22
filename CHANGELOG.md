@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.1] - 2026-05-22
+### Added
+- Security considerations on the project and comparison with commercial options.
+- Improving code readability, adding hw docs and specs for the CYD platform.
+- Improved installer for noobs.
+### Changed
+- Documentation update.
+- Security posture on firmware attacks and user suggestions.
+
+
 ## [1.0.0] - 2026-04-27
 ### Added
 - Initial release of the project.  
