@@ -33,6 +33,7 @@
 #define CONFIG_MAX_PROFILE_NAME   32
 #define CONFIG_MAX_SECRET_LEN     64
 
+
 /**
  * @brief OTP profile type
  */
@@ -41,12 +42,13 @@ typedef enum {
     OTP_TYPE_HOTP = 1,  // HMAC-based OTP
 } otp_type_t;
 
+
 /**
  * @brief OTP profile configuration
  */
 typedef struct {
-    char label[CONFIG_MAX_PROFILE_NAME];    // Profile label (e.g., "Google:user@gmail.com")
-    char issuer[CONFIG_MAX_PROFILE_NAME];   // Profile issuer (e.g., "Google")
+    char label[CONFIG_MAX_PROFILE_NAME];     // Profile label (e.g., "Google:user@gmail.com")
+    char issuer[CONFIG_MAX_PROFILE_NAME];    // Profile issuer (e.g., "Google")
     char icon[3];                            // Icon (2 ASCII chars + null terminator)
     otp_type_t type;                         // TOTP or HOTP
     char secret[CONFIG_MAX_SECRET_LEN];      // Base32-encoded secret
@@ -54,6 +56,7 @@ typedef struct {
     uint64_t counter;                        // HOTP counter
     uint8_t digits;                          // Number of digits (6 or 8)
 } otp_profile_t;
+
 
 /**
  * @brief Keymaker configuration structure
@@ -68,6 +71,7 @@ typedef struct {
     uint8_t profile_count;
 } keymaker_config_t;
 
+
 /**
  * @brief Initialize the configuration system
  *
@@ -77,6 +81,7 @@ typedef struct {
  */
 esp_err_t config_init(void);
 
+
 /**
  * @brief Load configuration from NVS
  *
@@ -84,6 +89,7 @@ esp_err_t config_init(void);
  * @return ESP_OK on success, ESP_ERR_NOT_FOUND if no config exists, error code otherwise
  */
 esp_err_t config_load(keymaker_config_t *config);
+
 
 /**
  * @brief Save configuration to NVS
@@ -93,12 +99,14 @@ esp_err_t config_load(keymaker_config_t *config);
  */
 esp_err_t config_save(const keymaker_config_t *config);
 
+
 /**
  * @brief Clear all configuration from NVS
  *
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t config_clear(void);
+
 
 /**
  * @brief Get current WiFi SSID from config
@@ -108,6 +116,7 @@ esp_err_t config_clear(void);
  */
 esp_err_t config_get_wifi_ssid(char *ssid);
 
+
 /**
  * @brief Get current WiFi password from config
  *
@@ -115,6 +124,7 @@ esp_err_t config_get_wifi_ssid(char *ssid);
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t config_get_wifi_password(char *password);
+
 
 /**
  * @brief Generate default icon text from profile label
@@ -126,6 +136,7 @@ esp_err_t config_get_wifi_password(char *password);
  */
 void config_generate_default_icon(otp_profile_t *profile);
 
+
 /**
  * @brief Set the encryption key for config operations
  *
@@ -135,5 +146,6 @@ void config_generate_default_icon(otp_profile_t *profile);
  * @param key Encryption key (CRYPTO_KEY_SIZE bytes)
  */
 void config_set_encryption_key(const uint8_t *key);
+
 
 #endif // CONFIG_H
