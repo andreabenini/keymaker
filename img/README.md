@@ -1,0 +1,1 @@
+Screenshots taken from the application
