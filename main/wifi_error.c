@@ -17,9 +17,9 @@
  * please contact the creator of this repository [andreabenini] @ gmail
  * for a commercial license.
  */
-
 #include "wifi_error.h"
 #include "esp_log.h"
+
 
 static const char *TAG = "wifi_error";
 static lv_obj_t *error_screen = NULL;
@@ -78,6 +78,9 @@ void wifi_error_show(lv_disp_t *disp) {
 } /**/
 
 
+/**
+ * Close/hide the wifi error messagebox
+ */
 void wifi_error_hide(void) {
     if (!error_screen) {
         return;
