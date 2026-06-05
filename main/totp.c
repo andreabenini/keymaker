@@ -26,6 +26,12 @@
 static const char *TAG = "totp";
 
 
+/**
+ * @brief Decode a Base32 character to its numeric value
+ *
+ * @param c Base32 character (A-Z, 2-7)
+ * @return Numeric value (0-31), or -1 if invalid
+ */
 static int base32_char_to_value(char c) {
     if (c >= 'A' && c <= 'Z') {
         return c - 'A';
@@ -43,6 +49,14 @@ static int base32_char_to_value(char c) {
 } /**/
 
 
+/**
+ * @brief Decode a Base32 string to raw bytes
+ *
+ * @param base32 Input Base32 string
+ * @param output Output buffer for decoded bytes
+ * @param output_len Size of output buffer
+ * @return Number of bytes written, or -1 on error
+ */
 static int base32_decode(const char *base32, uint8_t *output, size_t output_len) {
     if (!base32 || !output) {
         return -1;
@@ -78,6 +92,16 @@ static int base32_decode(const char *base32, uint8_t *output, size_t output_len)
 } /**/
 
 
+/**
+ * @brief Generate HMAC-SHA1 hash
+ *
+ * @param key Key bytes
+ * @param key_len Key length
+ * @param message Message bytes
+ * @param message_len Message length
+ * @param output Output buffer (20 bytes for SHA1)
+ * @return true on success, false on error
+ */
 static bool hmac_sha1(const uint8_t *key, size_t key_len, const uint8_t *message, size_t message_len, uint8_t *output) {
     mbedtls_md_context_t ctx;
     mbedtls_md_init(&ctx);
@@ -111,6 +135,16 @@ static bool hmac_sha1(const uint8_t *key, size_t key_len, const uint8_t *message
 } /**/
 
 
+/**
+ * @brief Generate TOTP code using HMAC-SHA1
+ *
+ * @param secret Raw secret bytes
+ * @param secret_len Secret length
+ * @param time_counter Time counter (unix_time / period)
+ * @param digits Number of digits (6 or 8)
+ * @param code_out Output buffer for code string
+ * @return true on success, false on error
+ */
 static bool totp_generate_code(const uint8_t *secret, size_t secret_len, uint64_t time_counter, uint8_t digits, char *code_out) {
     // Convert time counter to 8-byte big-endian
     uint8_t message[8];
