@@ -17,3 +17,48 @@
  * please contact the creator of this repository [andreabenini] @ gmail
  * for a commercial license.
  */
+
+#include "otp_uri.h"
+#include "esp_log.h"
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+static const char *TAG = "otp_uri";
+
+
+/**
+ * Check if string starts with prefix
+ */
+static bool starts_with(const char *str, const char *prefix) {
+    return strncmp(str, prefix, strlen(prefix)) == 0;
+} /**/
+
+
+/**
+ * URL decode a string
+ */
+static void url_decode(char *dst, const char *src, size_t max_len) {
+    char a, b;
+    size_t written = 0;
+    while (*src && written < max_len - 1) {
+        if (*src == '%' && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {
+            if (a >= 'a') a -= 'a'-'A';
+            if (a >= 'A') a -= ('A' - 10);
+            else a -= '0';
+            if (b >= 'a') b -= 'a'-'A';
+            if (b >= 'A') b -= ('A' - 10);
+            else b -= '0';
+            dst[written++] = 16*a+b;
+            src += 3;
+        } else if (*src == '+') {
+            dst[written++] = ' ';
+            src++;
+        } else {
+            dst[written++] = *src++;
+        }
+    }
+    dst[written] = '\0';
+} /**/
+
+
