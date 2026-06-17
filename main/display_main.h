@@ -47,4 +47,52 @@
 #define OTP_CODE_COLOR            0xFFFFFF  // White for OTP code
 #define OTP_PROGRESS_BG_COLOR     0x000000  // Black background for OTP progress
 
+
+/**
+ * @brief Initialize and create the main UI with header bar
+ *
+ * @param disp Pointer to the LVGL display object
+ * @param panel_handle Handle to the LCD panel for rotation control
+ * @param touch_handle Handle to the touch controller for rotation control
+ */
+void display_main_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle);
+
+/**
+ * @brief Update WiFi status icon
+ *
+ * @param connected true if WiFi is connected, false otherwise
+ */
+void display_main_set_wifi_status(bool connected);
+
+/**
+ * @brief Set WiFi icon to connecting state (yellow)
+ */
+void display_main_set_wifi_connecting(void);
+
+/**
+ * @brief Update WiFi connection info (SSID, IP, signal strength)
+ * Call this when WiFi connects to store info for display
+ *
+ * @param ssid WiFi network name
+ * @param ip_addr IP address string (e.g., "192.168.1.100")
+ * @param rssi Signal strength in dBm (e.g., -67)
+ */
+void display_main_set_wifi_info(const char *ssid, const char *ip_addr, int8_t rssi);
+
+/**
+ * @brief Trigger WiFi reconnection attempt
+ * Called externally to request a full WiFi reconnect
+ */
+void display_main_request_wifi_reconnect(void);
+
+/**
+ * @brief Check if WiFi reconnect was requested
+ * Called from main loop to poll for reconnect requests
+ * Clears the flag after returning true
+ *
+ * @return true if reconnect was requested, false otherwise
+ */
+bool display_main_check_wifi_reconnect_requested(void);
+
+
 #endif // DISPLAY_MAIN_H
