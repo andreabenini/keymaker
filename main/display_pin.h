@@ -50,4 +50,27 @@
 #define PIN_MIN_LENGTH                   1          // Minimum 1 character
 #define PIN_MAX_LENGTH                   8          // Maximum 8 characters
 
+
+/**
+ * @brief Initialize and create the PIN entry screen
+ *
+ * @param disp Pointer to the LVGL display object
+ * @param panel_handle Handle to the LCD panel (unused for now, for future use)
+ * @param touch_handle Handle to the touch controller (unused for now, for future use)
+ */
+void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle);
+
+/**
+ * @brief Check if PIN entry is complete and get the entered PIN
+ *
+ * @param pin_out Buffer to store the PIN (must be at least PIN_MAX_LENGTH + 1 bytes)
+ * @return true if user pressed ENTER with valid PIN, false otherwise
+ */
+bool display_pin_is_complete(char *pin_out);
+
+/**
+ * @brief Hide the PIN entry screen
+ */
+void display_pin_hide(void);
+
 #endif // DISPLAY_PIN_H
