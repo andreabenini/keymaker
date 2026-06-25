@@ -17,5 +17,8 @@
  * please contact the creator of this repository [andreabenini] @ gmail
  * for a commercial license.
  */
+#ifndef CALIBRATION_H
+#define CALIBRATION_H
 #pragma once
 
+#endif
