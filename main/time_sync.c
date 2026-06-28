@@ -24,3 +24,5 @@
 #include <sys/time.h>
 
 
+static const char *TAG = "time_sync";
+static bool time_synchronized = false;
