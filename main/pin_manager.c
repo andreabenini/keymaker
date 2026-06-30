@@ -52,3 +52,21 @@ static bool is_first_boot(void) {
     nvs_close(nvs_handle);
     return (ret != ESP_OK);
 } /**/
+
+
+/**
+ * @brief Show status message on screen
+ */
+static void show_status_message(lv_disp_t *disp, const char *message) {
+    lv_obj_t *scr = lv_disp_get_scr_act(disp);
+    lv_obj_clean(scr);
+    lv_obj_set_style_bg_color(scr, lv_color_hex(0x101010), 0);
+    lv_obj_t *label = lv_label_create(scr);
+    lv_label_set_text(label, message);
+    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+    lv_refr_now(disp);
+} /**/
+
