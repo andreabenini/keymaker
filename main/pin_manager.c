@@ -70,3 +70,120 @@ static void show_status_message(lv_disp_t *disp, const char *message) {
     lv_refr_now(disp);
 } /**/
 
+
+/**
+ * @brief Handle first boot PIN setup
+ */
+static esp_err_t handle_first_boot(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle, SemaphoreHandle_t lvgl_mux, uint8_t *key_out) {
+    ESP_LOGI(TAG, "First boot detected - setting up PIN");
+    char pin1[PIN_MAX_LENGTH + 1];
+    char pin2[PIN_MAX_LENGTH + 1];
+
+    // Ask for PIN (first time)
+    if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+        display_pin_create(disp, panel_handle, touch_handle);
+        xSemaphoreGive(lvgl_mux);
+    }
+    while (1) {
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            bool complete = display_pin_is_complete(pin1);
+            xSemaphoreGive(lvgl_mux);
+            if (complete) break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    ESP_LOGI(TAG, "First PIN entered (length: %d)", strlen(pin1));
+
+    // Ask for PIN confirmation
+    if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+        display_pin_hide();
+        show_status_message(disp, "Confirm your PIN");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        display_pin_create(disp, panel_handle, touch_handle);
+        xSemaphoreGive(lvgl_mux);
+    }
+    while (1) {
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            bool complete = display_pin_is_complete(pin2);
+            xSemaphoreGive(lvgl_mux);
+            if (complete) break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    ESP_LOGI(TAG, "Confirmation PIN entered (length: %d)", strlen(pin2));
+
+    // Check if PINs match
+    if (strcmp(pin1, pin2) != 0) {
+        ESP_LOGE(TAG, "PINs do not match!");
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            display_pin_hide();
+            show_status_message(disp, "PINs do not match!\n\nRebooting...");
+            xSemaphoreGive(lvgl_mux);
+        }
+        vTaskDelay(pdMS_TO_TICKS(3000));
+        esp_restart();
+    }
+    ESP_LOGI(TAG, "PINs match - generating salt and keys");
+
+    // Show "Decrypting device..." message
+    if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+        display_pin_hide();
+        show_status_message(disp, "Setting Encryption");
+        xSemaphoreGive(lvgl_mux);
+    }
+
+    // Generate salt
+    uint8_t salt[CRYPTO_SALT_SIZE];
+    esp_err_t ret = crypto_generate_salt(salt);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to generate salt");
+        return ret;
+    }
+    // Derive key from PIN
+    ret = crypto_derive_key(pin1, salt, key_out);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to derive key");
+        return ret;
+    }
+    // Create verification blob
+    uint8_t verification[MAX_VERIFY_SIZE];
+    size_t verify_len;
+    ret = crypto_create_verification(key_out, verification, &verify_len);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to create verification blob");
+        return ret;
+    }
+    // Store salt and verification in NVS
+    nvs_handle_t nvs_handle;
+    ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open NVS: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    ret = nvs_set_blob(nvs_handle, NVS_KEY_SALT, salt, CRYPTO_SALT_SIZE);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to save salt: %s", esp_err_to_name(ret));
+        nvs_close(nvs_handle);
+        return ret;
+    }
+    ret = nvs_set_blob(nvs_handle, NVS_KEY_VERIFY, verification, verify_len);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to save verification: %s", esp_err_to_name(ret));
+        nvs_close(nvs_handle);
+        return ret;
+    }
+    ret = nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to commit NVS: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    ESP_LOGI(TAG, "First boot setup complete");
+
+    // Clear PINs from memory
+    memset(pin1, 0, sizeof(pin1));
+    memset(pin2, 0, sizeof(pin2));
+    return ESP_OK;
+} /**/
+
+
