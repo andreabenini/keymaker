@@ -187,3 +187,81 @@ static esp_err_t handle_first_boot(lv_disp_t *disp, esp_lcd_panel_handle_t panel
 } /**/
 
 
+/**
+ * @brief Handle normal boot PIN unlock
+ */
+static esp_err_t handle_normal_boot(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle, SemaphoreHandle_t lvgl_mux, uint8_t *key_out) {
+    // Load salt from NVS
+    ESP_LOGI(TAG, "Normal boot - loading salt and verification");
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);     // NVS init
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open NVS: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    uint8_t salt[CRYPTO_SALT_SIZE];                                         // Loading salt
+    size_t salt_len = CRYPTO_SALT_SIZE;
+    ret = nvs_get_blob(nvs_handle, NVS_KEY_SALT, salt, &salt_len);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to load salt: %s", esp_err_to_name(ret));
+        nvs_close(nvs_handle);
+        return ret;
+    }
+    uint8_t verification[MAX_VERIFY_SIZE];                                  // Loading verification
+    size_t verify_len = MAX_VERIFY_SIZE;
+    ret = nvs_get_blob(nvs_handle, NVS_KEY_VERIFY, verification, &verify_len);
+    nvs_close(nvs_handle);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to load verification: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    ESP_LOGI(TAG, "Salt and verification loaded");
+    // PIN entry loop (retry on wrong PIN)
+    while (1) {
+        char entered_pin[PIN_MAX_LENGTH + 1];
+        // Show PIN entry screen
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            display_pin_create(disp, panel_handle, touch_handle);
+            xSemaphoreGive(lvgl_mux);
+        }
+        // Wait for PIN entry
+        while (1) {
+            if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+                bool complete = display_pin_is_complete(entered_pin);
+                xSemaphoreGive(lvgl_mux);
+                if (complete) break;
+            }
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+        ESP_LOGI(TAG, "PIN entered (length: %d)", strlen(entered_pin));
+        // Show "Decrypting device..." message
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            display_pin_hide();
+            show_status_message(disp, "Decrypting\nDevice");
+            xSemaphoreGive(lvgl_mux);
+        }
+        // Derive key from entered PIN
+        ret = crypto_derive_key(entered_pin, salt, key_out);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to derive key");
+            memset(entered_pin, 0, sizeof(entered_pin));
+            return ret;
+        }
+        // Verify PIN
+        ret = crypto_verify_pin(key_out, verification, verify_len);
+        // Clear PIN from memory
+        memset(entered_pin, 0, sizeof(entered_pin));
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "PIN verified successfully");
+            return ESP_OK;
+        }
+        // Wrong PIN - show error and retry
+        ESP_LOGW(TAG, "Incorrect PIN");
+        if (xSemaphoreTake(lvgl_mux, portMAX_DELAY) == pdTRUE) {
+            show_status_message(disp, "Incorrect PIN\n\nTry again");
+            xSemaphoreGive(lvgl_mux);
+        }
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+} /**/
