@@ -265,3 +265,17 @@ static esp_err_t handle_normal_boot(lv_disp_t *disp, esp_lcd_panel_handle_t pane
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 } /**/
+
+
+/**
+ * @brief Unlocking pin function, detect first and subsequent boots at startup
+ */
+esp_err_t pin_manager_unlock(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle, SemaphoreHandle_t lvgl_mux, uint8_t *key_out) {
+    if (!disp || !key_out) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    if (is_first_boot()) {
+        return handle_first_boot(disp, panel_handle, touch_handle, lvgl_mux, key_out);
+    }
+    return handle_normal_boot(disp, panel_handle, touch_handle, lvgl_mux, key_out);
+} /**/
