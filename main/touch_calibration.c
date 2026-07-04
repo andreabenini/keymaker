@@ -26,3 +26,18 @@
 
 static const char *TAG = "touch_cal";
 
+
+// NVS storage
+#define NVS_NAMESPACE "touch_cal"
+#define NVS_KEY_MIN_X "min_x"
+#define NVS_KEY_MAX_X "max_x"
+#define NVS_KEY_MIN_Y "min_y"
+#define NVS_KEY_MAX_Y "max_y"
+#define NVS_KEY_VALID "valid"
+
+// Screen dimensions
+#define SCREEN_WIDTH  320
+#define SCREEN_HEIGHT 240
+
+// Calibration target positions (screen coordinates)
+#define CAL_MARGIN 15
