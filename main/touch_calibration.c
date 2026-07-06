@@ -79,3 +79,12 @@ esp_err_t touch_cal_init(void) {
     }
     return ESP_OK;
 } /**/
+
+
+/**
+ * property reading touch screen data calibration values
+ */
+bool touch_cal_exists(void) {
+    return g_cal_data.valid;
+} /**/
+
