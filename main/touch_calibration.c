@@ -61,3 +61,21 @@ static esp_lcd_touch_handle_t g_touch_handle = NULL;
 static esp_err_t load_calibration(void);
 static esp_err_t save_calibration(void);
 
+
+/**
+ * Initialization of the touch screen window, loading calibration values
+ */
+esp_err_t touch_cal_init(void) {
+    ESP_LOGI(TAG, "Initializing touch calibration");
+    // Load calibration from NVS
+    esp_err_t ret = load_calibration();
+    if (ret == ESP_OK && g_cal_data.valid) {
+        ESP_LOGI(TAG, "Calibration loaded: X[%d,%d] Y[%d,%d]",
+                 g_cal_data.min_x, g_cal_data.max_x,
+                 g_cal_data.min_y, g_cal_data.max_y);
+    } else {
+        ESP_LOGW(TAG, "No valid calibration found");
+        g_cal_data.valid = false;
+    }
+    return ESP_OK;
+} /**/
