@@ -41,3 +41,23 @@ static const char *TAG = "touch_cal";
 
 // Calibration target positions (screen coordinates)
 #define CAL_MARGIN 15
+static const struct {
+    int16_t x;
+    int16_t y;
+} cal_targets[4] = {
+    {CAL_MARGIN, CAL_MARGIN},                                   // Top left
+    {SCREEN_WIDTH - CAL_MARGIN, CAL_MARGIN},                    // Top right
+    {SCREEN_WIDTH - CAL_MARGIN, SCREEN_HEIGHT - CAL_MARGIN},    // Bottom right
+    {CAL_MARGIN, SCREEN_HEIGHT - CAL_MARGIN}                    // Bottom left
+};
+
+// Global calibration data
+static touch_cal_data_t g_cal_data = {0};
+
+// External touch handle (needs to be set by main.c)
+static esp_lcd_touch_handle_t g_touch_handle = NULL;
+
+// Forward declarations
+static esp_err_t load_calibration(void);
+static esp_err_t save_calibration(void);
+
