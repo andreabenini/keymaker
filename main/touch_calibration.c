@@ -63,7 +63,7 @@ static esp_err_t save_calibration(void);
 
 
 /**
- * Initialization of the touch screen window, loading calibration values
+ * @brief Initialization of the touch screen window, loading calibration values
  */
 esp_err_t touch_cal_init(void) {
     ESP_LOGI(TAG, "Initializing touch calibration");
@@ -82,7 +82,7 @@ esp_err_t touch_cal_init(void) {
 
 
 /**
- * property reading touch screen data calibration values
+ * @brief property reading touch screen data calibration values
  */
 bool touch_cal_exists(void) {
     return g_cal_data.valid;
@@ -93,3 +93,32 @@ void touch_cal_set_handle(esp_lcd_touch_handle_t handle) {
     g_touch_handle = handle;
 } /**/
 
+
+/**
+ * @brief Loading calibration values from NVS storage
+ */
+static esp_err_t load_calibration(void) {
+    nvs_handle_t nvs_handle;
+    esp_err_t ret = nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    // Load all calibration values
+    int16_t min_x, max_x, min_y, max_y;
+    uint8_t valid;
+    ret  = nvs_get_i16(nvs_handle, NVS_KEY_MIN_X, &min_x);
+    ret |= nvs_get_i16(nvs_handle, NVS_KEY_MAX_X, &max_x);
+    ret |= nvs_get_i16(nvs_handle, NVS_KEY_MIN_Y, &min_y);
+    ret |= nvs_get_i16(nvs_handle, NVS_KEY_MAX_Y, &max_y);
+    ret |= nvs_get_u8(nvs_handle,  NVS_KEY_VALID, &valid);
+    nvs_close(nvs_handle);
+    if (ret == ESP_OK && valid) {
+        g_cal_data.min_x = min_x;
+        g_cal_data.max_x = max_x;
+        g_cal_data.min_y = min_y;
+        g_cal_data.max_y = max_y;
+        g_cal_data.valid = true;
+        return ESP_OK;
+    }
+    return ESP_FAIL;
+} /**/
