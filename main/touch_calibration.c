@@ -88,3 +88,8 @@ bool touch_cal_exists(void) {
     return g_cal_data.valid;
 } /**/
 
+
+void touch_cal_set_handle(esp_lcd_touch_handle_t handle) {
+    g_touch_handle = handle;
+} /**/
+
