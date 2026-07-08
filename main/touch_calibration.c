@@ -122,3 +122,33 @@ static esp_err_t load_calibration(void) {
     }
     return ESP_FAIL;
 } /**/
+
+
+/**
+ * @brief Save calibration data to NVS storage memory
+ */
+static esp_err_t save_calibration(void) {
+    nvs_handle_t nvs_handle;
+    esp_err_t ret;
+    ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open NVS: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    // Save all calibration values
+    ret = nvs_set_i16(nvs_handle, NVS_KEY_MIN_X, g_cal_data.min_x);
+    ret |= nvs_set_i16(nvs_handle, NVS_KEY_MAX_X, g_cal_data.max_x);
+    ret |= nvs_set_i16(nvs_handle, NVS_KEY_MIN_Y, g_cal_data.min_y);
+    ret |= nvs_set_i16(nvs_handle, NVS_KEY_MAX_Y, g_cal_data.max_y);
+    ret |= nvs_set_u8(nvs_handle, NVS_KEY_VALID, 1);
+    if (ret == ESP_OK) {
+        ret = nvs_commit(nvs_handle);
+    }
+    nvs_close(nvs_handle);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Calibration saved: X[%d,%d] Y[%d,%d]", g_cal_data.min_x, g_cal_data.max_x, g_cal_data.min_y, g_cal_data.max_y);
+    } else {
+        ESP_LOGE(TAG, "Failed to save calibration: %s", esp_err_to_name(ret));
+    }
+    return ret;
+} /**/
