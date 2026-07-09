@@ -152,3 +152,20 @@ static esp_err_t save_calibration(void) {
     }
     return ret;
 } /**/
+/**
+ * @brief Clearing calibration data
+ */
+esp_err_t touch_cal_clear(void) {
+    nvs_handle_t nvs_handle;
+    esp_err_t ret;
+    ret = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    nvs_erase_all(nvs_handle);
+    nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+    g_cal_data.valid = false;
+    ESP_LOGI(TAG, "Calibration cleared");
+    return ESP_OK;
+} /**/
