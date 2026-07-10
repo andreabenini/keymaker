@@ -152,6 +152,45 @@ static esp_err_t save_calibration(void) {
     }
     return ret;
 } /**/
+
+/**
+ * @brief Touch screen calibration transformation (linear interpolation)
+ */
+void touch_cal_transform(int16_t raw_x, int16_t raw_y, int16_t *cal_x, int16_t *cal_y) {
+    // No calibration - pass through
+    if (!g_cal_data.valid) {
+        *cal_x = raw_x;
+        *cal_y = raw_y;
+        return;
+    }
+    // Linear interpolation: map [min, max] raw to [0, screen_size]
+    int32_t x = ((int32_t)(raw_x - g_cal_data.min_x) * SCREEN_WIDTH)  / (g_cal_data.max_x - g_cal_data.min_x);
+    int32_t y = ((int32_t)(raw_y - g_cal_data.min_y) * SCREEN_HEIGHT) / (g_cal_data.max_y - g_cal_data.min_y);
+    // Store pre-clamp values for logging
+    int32_t x_before_clamp = x;
+    int32_t y_before_clamp = y;
+    bool clamped = false;
+    // Clamp to screen bounds
+    if (x < 0) { x = 0; clamped = true; }
+    if (x >= SCREEN_WIDTH) { x = SCREEN_WIDTH - 1; clamped = true; }
+    if (y < 0) { y = 0; clamped = true; }
+    if (y >= SCREEN_HEIGHT) { y = SCREEN_HEIGHT - 1; clamped = true; }
+    *cal_x = (int16_t)x;
+    *cal_y = (int16_t)y;
+
+    // Log transformation details (helps debug calibration issues)
+    if (clamped) {
+        ESP_LOGD(TAG, "Transform: raw(%d,%d) -> calc(%d,%d) -> clamped(%d,%d) [bounds: X[%d,%d] Y[%d,%d]]",
+                 raw_x, raw_y, x_before_clamp, y_before_clamp, *cal_x, *cal_y,
+                 g_cal_data.min_x, g_cal_data.max_x, g_cal_data.min_y, g_cal_data.max_y);
+    } else {
+        ESP_LOGD(TAG, "Transform: raw(%d,%d) -> cal(%d,%d) [bounds: X[%d,%d] Y[%d,%d]]",
+                 raw_x, raw_y, *cal_x, *cal_y,
+                 g_cal_data.min_x, g_cal_data.max_x, g_cal_data.min_y, g_cal_data.max_y);
+    }
+} /**/
+
+
 /**
  * @brief Clearing calibration data
  */
