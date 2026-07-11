@@ -197,6 +197,70 @@ esp_err_t touch_cal_run(lv_disp_t *disp) {
     int16_t raw_x[4] = {0};
     int16_t raw_y[4] = {0};
 
+    // Calibrate each corner (Main calibration loop)
+    for (int i = 0; i < 4; i++) {
+        ESP_LOGI(TAG, "Calibrating point %d at screen (%d, %d)", i, cal_targets[i].x, cal_targets[i].y);
+        // Create target circle
+        lv_obj_t *target = lv_obj_create(scr);
+        lv_obj_set_size(target, 40, 40);
+        lv_obj_set_pos(target, cal_targets[i].x - 20, cal_targets[i].y - 20);
+        lv_obj_set_style_bg_color(target, lv_color_hex(0xFF0000), 0);
+        lv_obj_set_style_radius(target, LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_border_width(target, 2, 0);
+        lv_obj_set_style_border_color(target, lv_color_hex(0xFFFFFF), 0);
+        // Create center dot
+        lv_obj_t *center = lv_obj_create(target);
+        lv_obj_set_size(center, 8, 8);
+        lv_obj_center(center);
+        lv_obj_set_style_bg_color(center, lv_color_hex(0xFFFFFF), 0);
+        lv_obj_set_style_radius(center, LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_border_width(center, 0, 0);
+        // Update display
+        lv_refr_now(disp);
+        // Wait for touch
+        ESP_LOGI(TAG, "Waiting for touch...");
+        bool touched = false;
+        bool was_touched = false;
+        while (!touched) {
+            uint16_t touch_x[1];
+            uint16_t touch_y[1];
+            uint16_t touch_strength[1];
+            uint8_t touch_cnt = 0;
+            esp_lcd_touch_read_data(g_touch_handle);
+            bool is_touched = esp_lcd_touch_get_coordinates(g_touch_handle, touch_x, touch_y, touch_strength, &touch_cnt, 1);
+            if (is_touched && touch_cnt > 0 && !was_touched) {
+                // New touch detected
+                raw_x[i] = touch_x[0];
+                raw_y[i] = touch_y[0];
+                ESP_LOGI(TAG, "Touch detected: raw(%d, %d)", raw_x[i], raw_y[i]);
+
+                // Flash the target to confirm
+                lv_obj_set_style_bg_color(target, lv_color_hex(0x00FF00), 0);
+                lv_refr_now(disp);
+                vTaskDelay(pdMS_TO_TICKS(200));
+                touched = true;
+            }
+            was_touched = is_touched;
+            vTaskDelay(pdMS_TO_TICKS(20));
+        }
+        // Wait for release
+        while (true) {
+            uint16_t touch_x[1];
+            uint16_t touch_y[1];
+            uint16_t touch_strength[1];
+            uint8_t touch_cnt = 0;
+            esp_lcd_touch_read_data(g_touch_handle);
+            bool is_touched = esp_lcd_touch_get_coordinates(g_touch_handle, touch_x, touch_y, touch_strength, &touch_cnt, 1);
+            if (!is_touched) {
+                break;
+            }
+            vTaskDelay(pdMS_TO_TICKS(20));
+        }
+        // Remove target
+        lv_obj_del(target);
+        lv_refr_now(disp);
+        vTaskDelay(pdMS_TO_TICKS(300));
+    }
 
     // Log all raw readings
     ESP_LOGI(TAG, "Raw readings collected:");
