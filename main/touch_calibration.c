@@ -153,6 +153,54 @@ static esp_err_t save_calibration(void) {
     return ret;
 } /**/
 
+
+/**
+ * @brief Touch screen calibration function
+ */
+esp_err_t touch_cal_run(lv_disp_t *disp) {
+    if (!g_touch_handle) {
+        ESP_LOGE(TAG, "Touch handle not set! Call touch_cal_set_handle() first");
+        return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "Starting touch calibration");
+    // Clear existing calibration data from NVS
+    ESP_LOGI(TAG, "Clearing existing calibration data");
+    touch_cal_clear();
+
+    // Reset touch controller to landscape defaults (same as boot settings)
+    // This ensures calibration is always done with known, consistent settings
+    ESP_LOGI(TAG, "Resetting touch controller to landscape defaults");
+    esp_lcd_touch_set_swap_xy(g_touch_handle, true);
+    esp_lcd_touch_set_mirror_x(g_touch_handle, true);
+    esp_lcd_touch_set_mirror_y(g_touch_handle, true);
+    lv_obj_t *scr = lv_disp_get_scr_act(disp);
+
+    // Clear screen
+    lv_obj_clean(scr);
+    lv_obj_set_style_bg_color(scr, lv_color_hex(0x000000), 0);
+    lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Create title
+    lv_obj_t *title = lv_label_create(scr);
+    lv_label_set_text(title, "Touch Calibration");
+    lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 10);
+
+    // Create instruction label
+    lv_obj_t *instr = lv_label_create(scr);
+    lv_label_set_text(instr, "Touch the center\nof each target");
+    lv_obj_set_style_text_color(instr, lv_color_hex(0xAAAAAA), 0);
+    lv_obj_set_style_text_align(instr, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(instr, LV_ALIGN_CENTER, 0, -50);
+
+    // Arrays to store raw touch readings
+    int16_t raw_x[4] = {0};
+    int16_t raw_y[4] = {0};
+
+    return ret;
+} /**/
+
+
 /**
  * @brief Touch screen calibration transformation (linear interpolation)
  */
