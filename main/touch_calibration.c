@@ -197,6 +197,40 @@ esp_err_t touch_cal_run(lv_disp_t *disp) {
     int16_t raw_x[4] = {0};
     int16_t raw_y[4] = {0};
 
+
+    // Log all raw readings
+    ESP_LOGI(TAG, "Raw readings collected:");
+    ESP_LOGI(TAG, "  Point 0 (top-left     %d,%d): raw(%d, %d)", cal_targets[0].x, cal_targets[0].y, raw_x[0], raw_y[0]);
+    ESP_LOGI(TAG, "  Point 1 (top-right    %d,%d): raw(%d, %d)", cal_targets[1].x, cal_targets[1].y, raw_x[1], raw_y[1]);
+    ESP_LOGI(TAG, "  Point 2 (bottom-right %d,%d): raw(%d, %d)", cal_targets[2].x, cal_targets[2].y, raw_x[2], raw_y[2]);
+    ESP_LOGI(TAG, "  Point 3 (bottom-left  %d,%d): raw(%d, %d)", cal_targets[3].x, cal_targets[3].y, raw_x[3], raw_y[3]);
+
+    // Calculate calibration bounds
+    g_cal_data.min_x = (raw_x[0] + raw_x[3]) / 2;  // Average of left points
+    g_cal_data.max_x = (raw_x[1] + raw_x[2]) / 2;  // Average of right points
+    g_cal_data.min_y = (raw_y[0] + raw_y[1]) / 2;  // Average of top points
+    g_cal_data.max_y = (raw_y[2] + raw_y[3]) / 2;  // Average of bottom points
+    g_cal_data.valid = true;
+
+    ESP_LOGI(TAG, "Calibration bounds calculated:");
+    ESP_LOGI(TAG, "  min_x = (%d + %d) / 2 = %d (left edge, maps to screen x=0)", raw_x[0], raw_x[3], g_cal_data.min_x);
+    ESP_LOGI(TAG, "  max_x = (%d + %d) / 2 = %d (right edge, maps to screen x=%d)", raw_x[1], raw_x[2], g_cal_data.max_x, SCREEN_WIDTH-1);
+    ESP_LOGI(TAG, "  min_y = (%d + %d) / 2 = %d (top edge, maps to screen y=0)", raw_y[0], raw_y[1], g_cal_data.min_y);
+    ESP_LOGI(TAG, "  max_y = (%d + %d) / 2 = %d (bottom edge, maps to screen y=%d)", raw_y[2], raw_y[3], g_cal_data.max_y, SCREEN_HEIGHT-1);
+    ESP_LOGI(TAG, "Calibration complete: X[%d,%d] Y[%d,%d]", g_cal_data.min_x, g_cal_data.max_x, g_cal_data.min_y, g_cal_data.max_y);
+
+    // Save to NVS
+    esp_err_t ret = save_calibration();
+
+    // Show success message
+    lv_obj_clean(scr);
+    lv_obj_t *success = lv_label_create(scr);
+    lv_label_set_text(success, "Calibration\nComplete!");
+    lv_obj_set_style_text_color(success, lv_color_hex(0x00FF00), 0);
+    lv_obj_set_style_text_align(success, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(success, LV_ALIGN_CENTER, 0, 0);
+    lv_refr_now(disp);
+    vTaskDelay(pdMS_TO_TICKS(1500));
     return ret;
 } /**/
 
