@@ -89,3 +89,38 @@ static void update_enter_button(void) {
     }
 } /**/
 
+
+/**
+ * Number button click handler
+ */
+static void number_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    // Provide visual feedback on press/release
+    if (code == LV_EVENT_PRESSED) {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0x404040), 0);  // Lighter on press
+        return;
+    } else if (code == LV_EVENT_RELEASED) {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(PIN_BUTTON_BG_COLOR), 0);  // Back to normal
+        return;
+    }
+    if (code != LV_EVENT_CLICKED) {
+        return;
+    }
+    int digit = (int)(intptr_t)lv_event_get_user_data(e);
+    ESP_LOGI(TAG, "Number button %d clicked (portrait=%d, width=%d, height=%d)", digit, g_is_portrait, g_current_width, g_current_height);
+
+    // Check if we can add more digits
+    if (g_pin_length >= PIN_MAX_LENGTH) {
+        ESP_LOGW(TAG, "PIN already at max length (%d)", PIN_MAX_LENGTH);
+        return;
+    }
+
+    // Add digit to PIN
+    g_pin_buffer[g_pin_length] = '0' + digit;
+    g_pin_length++;
+    g_pin_buffer[g_pin_length] = '\0';
+    ESP_LOGI(TAG, "PIN length: %d", g_pin_length);
+    update_pin_display();
+    update_enter_button();
+} /**/
