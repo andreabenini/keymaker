@@ -109,13 +109,11 @@ static void number_btn_event_cb(lv_event_t *e) {
     }
     int digit = (int)(intptr_t)lv_event_get_user_data(e);
     ESP_LOGI(TAG, "Number button %d clicked (portrait=%d, width=%d, height=%d)", digit, g_is_portrait, g_current_width, g_current_height);
-
     // Check if we can add more digits
     if (g_pin_length >= PIN_MAX_LENGTH) {
         ESP_LOGW(TAG, "PIN already at max length (%d)", PIN_MAX_LENGTH);
         return;
     }
-
     // Add digit to PIN
     g_pin_buffer[g_pin_length] = '0' + digit;
     g_pin_length++;
