@@ -122,3 +122,32 @@ static void number_btn_event_cb(lv_event_t *e) {
     update_pin_display();
     update_enter_button();
 } /**/
+
+
+/**
+ * Backspace button click handler
+ */
+static void backspace_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    // Provide visual feedback on press/release
+    if (code == LV_EVENT_PRESSED) {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0xFF4040), 0);  // Lighter red on press
+        return;
+    } else if (code == LV_EVENT_RELEASED) {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(PIN_BUTTON_BACKSPACE_COLOR), 0);  // Back to normal red
+        return;
+    }
+    if (code != LV_EVENT_CLICKED) {
+        return;
+    }
+    // Remove last digit if any
+    if (g_pin_length > 0) {
+        g_pin_length--;
+        g_pin_buffer[g_pin_length] = '\0';
+        ESP_LOGI(TAG, "Backspace - PIN length: %d", g_pin_length);
+        update_pin_display();
+        update_enter_button();
+    }
+} /**/
+
