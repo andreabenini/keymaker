@@ -151,3 +151,32 @@ static void backspace_btn_event_cb(lv_event_t *e) {
     }
 } /**/
 
+
+/**
+ * Enter button click handler
+ */
+ static void enter_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    ESP_LOGI(TAG, "Enter button event: code=%d, pin_length=%d", code, g_pin_length);
+    // Provide visual feedback on press/release (only when enabled)
+    if (g_pin_length >= PIN_MIN_LENGTH) {
+        if (code == LV_EVENT_PRESSED) {
+            ESP_LOGI(TAG, "Enter button PRESSED (enabled)");
+            lv_obj_set_style_bg_color(btn, lv_color_hex(0x40FF40), 0);  // Lighter green on press
+            return;
+        } else if (code == LV_EVENT_RELEASED) {
+            ESP_LOGI(TAG, "Enter button RELEASED (enabled)");
+            lv_obj_set_style_bg_color(btn, lv_color_hex(PIN_BUTTON_ENTER_ENABLED_COLOR), 0);  // Back to normal green
+            return;
+        }
+    }
+    if (code != LV_EVENT_CLICKED) {
+        return;
+    }
+    // Only process if we have at least minimum length
+    if (g_pin_length >= PIN_MIN_LENGTH) {
+        ESP_LOGI(TAG, "PIN entry complete - length: %d", g_pin_length);
+        g_pin_complete = true;
+    }
+} /**/
