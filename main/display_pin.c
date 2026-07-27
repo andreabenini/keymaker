@@ -215,3 +215,34 @@ static void hamburger_btn_event_cb(lv_event_t *e) {
         rebuild_pin_screen();
     }
 } /**/
+
+
+/**
+ * Rebuild the PIN screen with current dimensions
+ */
+static void rebuild_pin_screen(void) {
+    // Preserve PIN state
+    char saved_pin[PIN_MAX_LENGTH + 1];
+    int saved_length = g_pin_length;
+    bool saved_complete = g_pin_complete;
+    strncpy(saved_pin, g_pin_buffer, sizeof(saved_pin));
+    // Delete existing screen
+    if (g_pin_screen) {
+        lv_obj_del(g_pin_screen);
+        g_pin_screen = NULL;
+        g_pin_display_label = NULL;
+        g_enter_btn = NULL;
+        g_enter_label = NULL;
+    }
+    // Recreate screen (will use updated g_current_width/height)
+    display_pin_create(g_disp, g_panel_handle, g_touch_handle);
+    // Restore PIN state
+    strncpy(g_pin_buffer, saved_pin, sizeof(g_pin_buffer));
+    g_pin_length = saved_length;
+    g_pin_complete = saved_complete;
+    // Update display
+    update_pin_display();
+    update_enter_button();
+} /**/
+
+
