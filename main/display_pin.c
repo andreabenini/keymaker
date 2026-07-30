@@ -246,21 +246,20 @@ static void rebuild_pin_screen(void) {
 } /**/
 
 
-void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle)
-{
-    ESP_LOGI(TAG, "DEBUG: *** display_pin_create() CALLED *** (this should only happen at startup!)");
-
+/**
+ * PIN creation and display screen
+ */
+void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle) {
     // Store handles (only on first call)
+    ESP_LOGI(TAG, "DEBUG: *** display_pin_create() CALLED *** (this should only happen at startup!)");
     if (!g_disp) {
         g_disp = disp;
         g_panel_handle = panel_handle;
         g_touch_handle = touch_handle;
-
         // Initialize dimensions (landscape mode by default)
         g_current_width = LCD_H_RES;
         g_current_height = LCD_V_RES;
     }
-
     // Reset PIN state on each creation (allows re-entry for confirmation)
     memset(g_pin_buffer, 0, sizeof(g_pin_buffer));
     g_pin_length = 0;
@@ -328,14 +327,12 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
     // Use ~90% of width for buttons, leave margins
     int available_width = (g_current_width * 90) / 100;
     int available_height = g_current_height - PIN_HEADER_HEIGHT - 20;  // 20px bottom margin
-
     int button_width = (available_width - (2 * PIN_BUTTON_GAP)) / 3;
     int button_height = (available_height - (3 * PIN_BUTTON_GAP)) / 4;
 
     // Ensure buttons are reasonable size (not too small)
     if (button_width < 60) button_width = 60;
     if (button_height < 35) button_height = 35;
-
     int total_width = (button_width * 3) + (PIN_BUTTON_GAP * 2);
     int total_height = (button_height * 4) + (PIN_BUTTON_GAP * 3);
     int start_x = (g_current_width - total_width) / 2;
@@ -343,9 +340,7 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
 
     // Use bigger font in landscape mode for better readability
     const lv_font_t *button_font = g_is_portrait ? &lv_font_montserrat_20 : &lv_font_montserrat_48;
-
-    ESP_LOGI(TAG, "Button sizing: portrait=%d, screen=%dx%d, button=%dx%d",
-             g_is_portrait, g_current_width, g_current_height, button_width, button_height);
+    ESP_LOGI(TAG, "Button sizing: portrait=%d, screen=%dx%d, button=%dx%d", g_is_portrait, g_current_width, g_current_height, button_width, button_height);
 
     // Create number buttons 1-9 in 3x3 grid
     for (int row = 0; row < 3; row++) {
@@ -372,7 +367,6 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
             lv_obj_clear_flag(label, LV_OBJ_FLAG_CLICKABLE);  // Let touches pass through to button
         }
     }
-
     // Bottom row: Backspace, 0, Enter
     int bottom_y = start_y + (3 * (button_height + PIN_BUTTON_GAP));
 
@@ -404,7 +398,6 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
     lv_obj_add_event_cb(zero_btn, number_btn_event_cb, LV_EVENT_PRESSED, (void *)(intptr_t)0);
     lv_obj_add_event_cb(zero_btn, number_btn_event_cb, LV_EVENT_RELEASED, (void *)(intptr_t)0);
     lv_obj_add_event_cb(zero_btn, number_btn_event_cb, LV_EVENT_CLICKED, (void *)(intptr_t)0);
-
     lv_obj_t *zero_label = lv_label_create(zero_btn);
     lv_label_set_text(zero_label, "0");
     lv_obj_set_style_text_color(zero_label, lv_color_hex(PIN_BUTTON_TEXT_COLOR), 0);
@@ -417,10 +410,7 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
     lv_obj_set_size(g_enter_btn, button_width, button_height);
     int enter_x = start_x + (2 * (button_width + PIN_BUTTON_GAP));
     lv_obj_set_pos(g_enter_btn, enter_x, bottom_y);
-    ESP_LOGI(TAG, "Enter button bounds: x=%d to %d, y=%d to %d (w=%d, h=%d)",
-             enter_x, enter_x + button_width,
-             bottom_y, bottom_y + button_height,
-             button_width, button_height);
+    ESP_LOGI(TAG, "Enter button bounds: x=%d to %d, y=%d to %d (w=%d, h=%d)", enter_x, enter_x + button_width, bottom_y, bottom_y + button_height, button_width, button_height);
     lv_obj_set_style_bg_color(g_enter_btn, lv_color_hex(PIN_BUTTON_ENTER_DISABLED_COLOR), 0);
     lv_obj_set_style_radius(g_enter_btn, 8, 0);
     lv_obj_set_style_pad_all(g_enter_btn, 0, 0);  // Remove default padding
@@ -428,43 +418,13 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
     lv_obj_add_event_cb(g_enter_btn, enter_btn_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(g_enter_btn, enter_btn_event_cb, LV_EVENT_CLICKED, NULL);
     lv_obj_add_state(g_enter_btn, LV_STATE_DISABLED);
-
     g_enter_label = lv_label_create(g_enter_btn);
     lv_label_set_text(g_enter_label, LV_SYMBOL_OK);
     lv_obj_set_style_text_color(g_enter_label, lv_color_hex(PIN_BUTTON_TEXT_COLOR), 0);  // White like other buttons
     lv_obj_set_style_text_font(g_enter_label, button_font, 0);
     lv_obj_center(g_enter_label);
     lv_obj_clear_flag(g_enter_label, LV_OBJ_FLAG_CLICKABLE);  // Let touches pass through
-
     ESP_LOGI(TAG, "PIN entry screen created");
-}
+} /**/
 
-bool display_pin_is_complete(char *pin_out)
-{
-    if (g_pin_complete && pin_out) {
-        strncpy(pin_out, g_pin_buffer, PIN_MAX_LENGTH);
-        pin_out[PIN_MAX_LENGTH] = '\0';
-        return true;
-    }
-    return false;
-}
 
-void display_pin_hide(void)
-{
-    if (g_pin_screen) {
-        // Get screen before deleting PIN screen
-        lv_obj_t *scr = lv_obj_get_parent(g_pin_screen);
-
-        // Delete PIN screen and all its children
-        lv_obj_del(g_pin_screen);
-        g_pin_screen = NULL;
-        g_pin_display_label = NULL;
-        g_enter_btn = NULL;
-        g_enter_label = NULL;
-
-        // Clean the screen to remove any rendering artifacts
-        lv_obj_clean(scr);
-
-        ESP_LOGI(TAG, "PIN entry screen hidden");
-    }
-}
