@@ -428,3 +428,16 @@ void display_pin_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, es
 } /**/
 
 
+/**
+ * checking if pin length matches
+ */
+bool display_pin_is_complete(char *pin_out) {
+    if (g_pin_complete && pin_out) {
+        strncpy(pin_out, g_pin_buffer, PIN_MAX_LENGTH);
+        pin_out[PIN_MAX_LENGTH] = '\0';
+        return true;
+    }
+    return false;
+} /**/
+
+
