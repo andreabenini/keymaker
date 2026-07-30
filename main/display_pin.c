@@ -441,3 +441,21 @@ bool display_pin_is_complete(char *pin_out) {
 } /**/
 
 
+/**
+ * hiding screen
+ */
+void display_pin_hide(void) {
+    if (g_pin_screen) {
+        // Get screen before deleting PIN screen
+        lv_obj_t *scr = lv_obj_get_parent(g_pin_screen);
+        // Delete PIN screen and all its children
+        lv_obj_del(g_pin_screen);
+        g_pin_screen = NULL;
+        g_pin_display_label = NULL;
+        g_enter_btn = NULL;
+        g_enter_label = NULL;
+        // Clean the screen to remove any rendering artifacts
+        lv_obj_clean(scr);
+        ESP_LOGI(TAG, "PIN entry screen hidden");
+    }
+} /**/
