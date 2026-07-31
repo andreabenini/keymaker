@@ -25,3 +25,15 @@
 
 static const char *TAG = "display_setup";
 
+// UI elements
+static lv_obj_t *g_setup_screen = NULL;
+static lv_obj_t *g_qrcode = NULL;
+static lv_obj_t *g_cancel_btn = NULL;
+static lv_obj_t *g_status_label = NULL;
+static lv_obj_t *g_instruction_label = NULL;
+
+// Display reference and original screen
+static lv_disp_t *g_disp = NULL;
+static lv_obj_t *g_original_screen = NULL;
+static bool g_is_portrait = false;
+
