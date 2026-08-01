@@ -37,3 +37,13 @@ static lv_disp_t *g_disp = NULL;
 static lv_obj_t *g_original_screen = NULL;
 static bool g_is_portrait = false;
 
+// Forward declarations
+static void cancel_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_PRESSED) {
+        ESP_LOGI(TAG, "Cancel button pressed - exiting setup");
+        display_setup_hide();
+    }
+} /**/
+
+
