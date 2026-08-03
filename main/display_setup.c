@@ -159,3 +159,31 @@ void display_setup_show(lv_disp_t *disp) {
 } /**/
 
 
+/**
+ * Hide setup screen
+ */
+void display_setup_hide(void) {
+    ESP_LOGI(TAG, "Hiding setup screen");
+    if (g_setup_screen) {
+        // Restore the original main screen FIRST (instant feedback)
+        if (g_original_screen) {
+            lv_disp_load_scr(g_original_screen);
+            ESP_LOGI(TAG, "Main screen restored");
+        }
+
+        // Delete setup screen
+        lv_obj_del(g_setup_screen);
+        g_setup_screen = NULL;
+        g_qrcode = NULL;
+        g_cancel_btn = NULL;
+        g_status_label = NULL;
+        g_instruction_label = NULL;
+        g_original_screen = NULL;
+
+        // Request portal exit to trigger WiFi reconnection in main loop
+        portal_request_exit();
+        // Stop the captive portal AFTER (runs in background with stopping flag set)
+        portal_stop();
+        ESP_LOGI(TAG, "Setup screen hidden, portal stopping in background");
+    }
+} /**/
