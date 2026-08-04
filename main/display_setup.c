@@ -222,3 +222,22 @@ bool display_setup_is_visible(void) {
     return (g_setup_screen != NULL);
 } /**/
 
+
+/**
+ * Set setup status display ready
+ */
+void display_setup_set_status_ready(void) {
+    if (g_status_label) {
+        if (g_is_portrait) {
+            lv_label_set_text(g_status_label, "Captive Portal Activated");  // Single line for portrait
+        } else {
+            lv_label_set_text(g_status_label, "Captive Portal\nActivated");  // Two lines for landscape
+        }
+        ESP_LOGI(TAG, "Status updated: portal activated");
+    }
+    if (g_instruction_label) {
+        // Same text for both portrait and landscape - wraps naturally
+        lv_label_set_text(g_instruction_label, "http://192.168.4.1\nto configure");
+        ESP_LOGI(TAG, "Instruction label shown");
+    }
+} /**/
