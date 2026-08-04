@@ -187,3 +187,30 @@ void display_setup_hide(void) {
         ESP_LOGI(TAG, "Setup screen hidden, portal stopping in background");
     }
 } /**/
+
+
+/**
+ * Create WiFi QR code data in standard format
+ */
+void display_setup_update_qrcode(const char *ssid, const char *url) {
+    if (!g_qrcode || !ssid || !url) {
+        ESP_LOGW(TAG, "Cannot update QR code: qrcode=%p, ssid=%p, url=%p", g_qrcode, ssid, url);
+        return;
+    }
+    // Create WiFi QR code data in standard format, this allows phones to scan and connect to the WiFi network directly
+    //      Format: WIFI:T:nopass;S:<ssid>;P:;;
+    char qr_data[256];
+    snprintf(qr_data, sizeof(qr_data), "WIFI:T:nopass;S:%s;P:;;", ssid);
+    ESP_LOGI(TAG, "Creating QR code with data: %s", qr_data);
+
+    // Clear any existing children
+    lv_obj_clean(g_qrcode);
+    // Create LVGL QR code widget (black on white for best scanning)
+    lv_obj_t *qr = lv_qrcode_create(g_qrcode, 150, lv_color_hex(0x000000), lv_color_hex(0xFFFFFF));
+    // Update QR code with WiFi connection data
+    lv_qrcode_update(qr, qr_data, strlen(qr_data));
+    // Center the QR code in the container
+    lv_obj_center(qr);
+    ESP_LOGI(TAG, "QR code updated successfully for SSID=%s, URL=%s", ssid, url);
+} /**/
+
