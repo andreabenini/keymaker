@@ -214,3 +214,11 @@ void display_setup_update_qrcode(const char *ssid, const char *url) {
     ESP_LOGI(TAG, "QR code updated successfully for SSID=%s, URL=%s", ssid, url);
 } /**/
 
+
+/**
+ * Detect if setup screen is visible
+ */
+bool display_setup_is_visible(void) {
+    return (g_setup_screen != NULL);
+} /**/
+
