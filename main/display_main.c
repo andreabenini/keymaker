@@ -17,3 +17,16 @@
  * please contact the creator of this repository [andreabenini] @ gmail
  * for a commercial license.
  */
+#include "display_main.h"
+#include "display_setup.h"
+#include "portal.h"
+#include "config.h"
+#include "totp.h"
+#include "time_sync.h"
+#include "wifi_error.h"
+#include "esp_log.h"
+#include <stdlib.h>
+
+// Display resolution (imported from main)
+#define LCD_H_RES              320
+#define LCD_V_RES              240
