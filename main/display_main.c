@@ -30,3 +30,34 @@
 // Display resolution (imported from main)
 #define LCD_H_RES              320
 #define LCD_V_RES              240
+
+
+static const char *TAG = "display_main";
+
+// Current display resolution (updated on rotation)
+static int g_current_width = LCD_H_RES;
+static int g_current_height = LCD_V_RES;
+
+// Global UI elements
+static lv_obj_t *g_header_bar = NULL;
+static lv_obj_t *g_hamburger_btn = NULL;
+static lv_obj_t *g_gear_btn = NULL;
+static lv_obj_t *g_wifi_icon = NULL;
+static lv_obj_t *g_profile_list = NULL;
+
+// Rotation state
+static lv_disp_t *g_disp = NULL;
+static esp_lcd_panel_handle_t g_panel_handle = NULL;
+static esp_lcd_touch_handle_t g_touch_handle = NULL;
+static bool g_is_portrait = false;  // false = landscape, true = portrait
+
+// WiFi state tracking
+typedef enum {
+    WIFI_STATE_DISCONNECTED,
+    WIFI_STATE_CONNECTING,
+    WIFI_STATE_CONNECTED
+} wifi_state_t;
+
+static wifi_state_t g_wifi_state = WIFI_STATE_DISCONNECTED;
+static bool g_wifi_connected = false;  // Keep for backwards compatibility
+
