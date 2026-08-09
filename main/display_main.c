@@ -61,3 +61,24 @@ typedef enum {
 static wifi_state_t g_wifi_state = WIFI_STATE_DISCONNECTED;
 static bool g_wifi_connected = false;  // Keep for backwards compatibility
 
+// WiFi connection info
+static char g_wifi_ssid[64] = {0};
+static char g_wifi_ip[16] = {0};
+static int8_t g_wifi_rssi = 0;
+
+// WiFi reconnect request flag
+static bool g_wifi_reconnect_requested = false;
+
+// Card state for OTP display
+typedef struct {
+    int profile_index;              // Index of profile in config
+    lv_obj_t *card;                 // Card container
+    lv_obj_t *text_container;       // Text container (label/issuer)
+    lv_obj_t *otp_label;           // OTP code label (created on tap)
+    lv_obj_t *progress_bg;         // Black background that shrinks as progress (created on tap)
+    lv_timer_t *timer;             // Timer for progress updates
+    uint64_t window_start;         // When current TOTP window started
+    uint64_t window_end;           // When current TOTP window ends
+    uint32_t period;               // TOTP period for this profile
+    bool showing_code;             // True if currently showing OTP code
+} card_state_t;
