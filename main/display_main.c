@@ -91,10 +91,43 @@ static int g_card_state_count = 0;
 // Forward declarations
 static void hamburger_btn_event_cb(lv_event_t *e);
 static void gear_btn_event_cb(lv_event_t *e);
-static void wifi_icon_event_cb(lv_event_t *e);
 static void wifi_popup_close_cb(lv_event_t *e);
+static void wifi_icon_event_cb(lv_event_t *e);
 static void rebuild_header_bar(void);
 static void rebuild_profile_list(void);
 static void card_tap_event_cb(lv_event_t *e);
 static void progress_timer_cb(lv_timer_t *timer);
 
+
+/**
+ * 
+ */
+static void hamburger_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED) {
+        ESP_LOGI(TAG, "Hamburger button clicked - toggling rotation");
+        // Toggle rotation state
+        g_is_portrait = !g_is_portrait;
+        if (g_is_portrait) {
+            // Switch to portrait mode (270 degrees)
+            ESP_LOGI(TAG, "Switching to portrait mode");
+            g_current_width = LCD_V_RES;
+            g_current_height = LCD_H_RES;
+            lv_disp_set_rotation(g_disp, LV_DISP_ROT_270);
+            esp_lcd_panel_swap_xy(g_panel_handle, true);
+            esp_lcd_panel_mirror(g_panel_handle, true, true);
+            // Keep touch in landscape calibration mode - LVGL will handle rotation
+        } else {
+            // Switch to landscape mode (0 degrees)
+            ESP_LOGI(TAG, "Switching to landscape mode");
+            g_current_width = LCD_H_RES;
+            g_current_height = LCD_V_RES;
+            lv_disp_set_rotation(g_disp, LV_DISP_ROT_NONE);
+            esp_lcd_panel_swap_xy(g_panel_handle, false);
+            esp_lcd_panel_mirror(g_panel_handle, true, false);
+            // Touch stays in landscape calibration mode (no changes needed)
+        }
+        rebuild_header_bar();           // Rebuild header bar with new dimensions
+        rebuild_profile_list();         // Rebuild profile list with new dimensions
+    }
+} /**/
