@@ -74,11 +74,27 @@ typedef struct {
     int profile_index;              // Index of profile in config
     lv_obj_t *card;                 // Card container
     lv_obj_t *text_container;       // Text container (label/issuer)
-    lv_obj_t *otp_label;           // OTP code label (created on tap)
-    lv_obj_t *progress_bg;         // Black background that shrinks as progress (created on tap)
-    lv_timer_t *timer;             // Timer for progress updates
-    uint64_t window_start;         // When current TOTP window started
-    uint64_t window_end;           // When current TOTP window ends
-    uint32_t period;               // TOTP period for this profile
-    bool showing_code;             // True if currently showing OTP code
+    lv_obj_t *otp_label;            // OTP code label (created on tap)
+    lv_obj_t *progress_bg;          // Black background that shrinks as progress (created on tap)
+    lv_timer_t *timer;              // Timer for progress updates
+    uint64_t window_start;          // When current TOTP window started
+    uint64_t window_end;            // When current TOTP window ends
+    uint32_t period;                // TOTP period for this profile
+    bool showing_code;              // True if currently showing OTP code
 } card_state_t;
+
+#define MAX_CARD_STATES 20
+static card_state_t g_card_states[MAX_CARD_STATES];
+static int g_card_state_count = 0;
+
+
+// Forward declarations
+static void hamburger_btn_event_cb(lv_event_t *e);
+static void gear_btn_event_cb(lv_event_t *e);
+static void wifi_icon_event_cb(lv_event_t *e);
+static void wifi_popup_close_cb(lv_event_t *e);
+static void rebuild_header_bar(void);
+static void rebuild_profile_list(void);
+static void card_tap_event_cb(lv_event_t *e);
+static void progress_timer_cb(lv_timer_t *timer);
+
