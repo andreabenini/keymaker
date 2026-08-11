@@ -131,3 +131,36 @@ static void hamburger_btn_event_cb(lv_event_t *e) {
         rebuild_profile_list();         // Rebuild profile list with new dimensions
     }
 } /**/
+
+
+/**
+ * 
+ */
+static void gear_btn_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    ESP_LOGI(TAG, "Gear button event: %d", code);
+    if (code == LV_EVENT_CLICKED) {
+        ESP_LOGI(TAG, "Gear button clicked - entering setup mode");
+        // Check if portal is still stopping from previous session
+        if (portal_is_stopping()) {
+            ESP_LOGW(TAG, "Portal is still stopping, please wait a moment");
+            // TODO: Could show a toast message here
+            return;
+        }
+        // Start the captive portal
+        esp_err_t ret = portal_start();
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to start portal: %s", esp_err_to_name(ret));
+            return;
+        }
+        // Show setup screen
+        ESP_LOGI(TAG, "Showing setup screen...");
+        display_setup_show(g_disp);
+        // Update QR code with portal info
+        ESP_LOGI(TAG, "Updating QR code with SSID=%s, URL=%s", portal_get_ssid(), portal_get_url());
+        display_setup_update_qrcode(portal_get_ssid(), portal_get_url());
+        // Update status to show portal is ready
+        display_setup_set_status_ready();
+        ESP_LOGI(TAG, "Setup mode activated");
+    }
+} /**/
