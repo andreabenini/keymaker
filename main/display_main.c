@@ -181,7 +181,7 @@ static void wifi_popup_close_cb(lv_event_t *e) {
 
 
 /**
- * 
+ * Wifi icon even handler
  */
 static void wifi_icon_event_cb(lv_event_t *e) {
     lv_event_code_t code = lv_event_get_code(e);
@@ -249,3 +249,4 @@ static void wifi_icon_event_cb(lv_event_t *e) {
         // If CONNECTING, do nothing (non-clickable state)
     }
 } /**/
+
