@@ -179,3 +179,74 @@ static void wifi_popup_close_cb(lv_event_t *e) {
     }
 } /**/
 
+
+/**
+ * 
+ */
+static void wifi_icon_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED) {
+        ESP_LOGI(TAG, "WiFi icon clicked - state=%d", g_wifi_state);
+        if (g_wifi_state == WIFI_STATE_CONNECTED) {
+            ESP_LOGI(TAG, "Showing WiFi connection info");                      // Show connection info popup
+            lv_obj_t *scr = lv_disp_get_scr_act(g_disp);                        // Create message box on the current screen
+            // Create a simple popup instead of msgbox for better control
+            lv_obj_t *popup = lv_obj_create(scr);
+            lv_obj_set_size(popup, g_current_width - 40, 180);
+            lv_obj_center(popup);
+            lv_obj_set_style_bg_color(popup, lv_color_hex(0x2a2a2a), 0);
+            lv_obj_set_style_border_color(popup, lv_color_hex(0x00FF00), 0);
+            lv_obj_set_style_border_width(popup, 2, 0);
+            lv_obj_set_style_radius(popup, 10, 0);
+            lv_obj_set_style_pad_all(popup, 15, 0);
+            lv_obj_clear_flag(popup, LV_OBJ_FLAG_SCROLLABLE);
+
+            // Title
+            lv_obj_t *title = lv_label_create(popup);
+            lv_label_set_text(title, "WiFi Connection");
+            lv_obj_set_style_text_color(title, lv_color_hex(0x00FF00), 0);
+            lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
+            lv_obj_set_pos(title, 0, 0);
+
+            // Build info text
+            char info_text[256];
+            int rssi_bars = 0;
+            if (g_wifi_rssi >= -50) rssi_bars = 4;
+            else if (g_wifi_rssi >= -60) rssi_bars = 3;
+            else if (g_wifi_rssi >= -70) rssi_bars = 2;
+            else rssi_bars = 1;
+            snprintf(info_text, sizeof(info_text), "SSID: %s\n" "IP: %s\n" "Signal: %d dBm (%d/4 bars)", g_wifi_ssid, g_wifi_ip, g_wifi_rssi, rssi_bars);
+
+            // Info text
+            lv_obj_t *text = lv_label_create(popup);
+            lv_label_set_text(text, info_text);
+            lv_obj_set_style_text_color(text, lv_color_hex(0xFFFFFF), 0);
+            lv_obj_set_style_text_align(text, LV_TEXT_ALIGN_LEFT, 0);
+            lv_obj_set_pos(text, 0, 30);
+
+            // Close button (centered at bottom)
+            lv_obj_t *close_btn = lv_btn_create(popup);
+            lv_obj_set_size(close_btn, 100, 40);
+            lv_obj_align(close_btn, LV_ALIGN_BOTTOM_MID, 0, -10);               // Centered horizontally, 10px from bottom
+
+            lv_obj_t *close_label = lv_label_create(close_btn);
+            lv_label_set_text(close_label, "Close");
+            lv_obj_center(close_label);
+            lv_obj_clear_flag(close_label, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_add_event_cb(close_btn, wifi_popup_close_cb, LV_EVENT_CLICKED, popup);   // Auto-delete popup when close button is clicked
+            lv_obj_add_flag(popup, LV_OBJ_FLAG_CLICKABLE);                      // Also make popup clickable to close (but not the children)
+
+        } else if (g_wifi_state == WIFI_STATE_DISCONNECTED) {                   // Request WiFi reconnection
+            ESP_LOGI(TAG, "Requesting WiFi reconnection");
+            g_wifi_reconnect_requested = true;
+
+            // Set connecting state immediately for visual feedback
+            g_wifi_state = WIFI_STATE_CONNECTING;
+            if (g_wifi_icon) {
+                lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_CONNECTING_COLOR), 0);
+            }
+        }
+        // If CONNECTING, do nothing (non-clickable state)
+    }
+} /**/
+
