@@ -164,3 +164,18 @@ static void gear_btn_event_cb(lv_event_t *e) {
         ESP_LOGI(TAG, "Setup mode activated");
     }
 } /**/
+
+
+/**
+ * Closing wifi popup window
+ */
+static void wifi_popup_close_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED) {
+        lv_obj_t *popup = (lv_obj_t *)lv_event_get_user_data(e);
+        if (popup) {
+            lv_obj_del(popup);
+        }
+    }
+} /**/
+
