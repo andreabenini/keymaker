@@ -227,16 +227,16 @@ static void wifi_icon_event_cb(lv_event_t *e) {
             // Close button (centered at bottom)
             lv_obj_t *close_btn = lv_btn_create(popup);
             lv_obj_set_size(close_btn, 100, 40);
-            lv_obj_align(close_btn, LV_ALIGN_BOTTOM_MID, 0, -10);               // Centered horizontally, 10px from bottom
+            lv_obj_align(close_btn, LV_ALIGN_BOTTOM_MID, 0, -10);                           // Centered horizontally, 10px from bottom
 
             lv_obj_t *close_label = lv_label_create(close_btn);
             lv_label_set_text(close_label, "Close");
             lv_obj_center(close_label);
             lv_obj_clear_flag(close_label, LV_OBJ_FLAG_CLICKABLE);
             lv_obj_add_event_cb(close_btn, wifi_popup_close_cb, LV_EVENT_CLICKED, popup);   // Auto-delete popup when close button is clicked
-            lv_obj_add_flag(popup, LV_OBJ_FLAG_CLICKABLE);                      // Also make popup clickable to close (but not the children)
+            lv_obj_add_flag(popup, LV_OBJ_FLAG_CLICKABLE);                                  // Also make popup clickable to close (but not the children)
 
-        } else if (g_wifi_state == WIFI_STATE_DISCONNECTED) {                   // Request WiFi reconnection
+        } else if (g_wifi_state == WIFI_STATE_DISCONNECTED) {                               // Request WiFi reconnection
             ESP_LOGI(TAG, "Requesting WiFi reconnection");
             g_wifi_reconnect_requested = true;
 
@@ -249,4 +249,3 @@ static void wifi_icon_event_cb(lv_event_t *e) {
         // If CONNECTING, do nothing (non-clickable state)
     }
 } /**/
-
