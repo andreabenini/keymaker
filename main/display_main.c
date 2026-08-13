@@ -250,3 +250,102 @@ static void wifi_icon_event_cb(lv_event_t *e) {
     }
 } /**/
 
+
+/**
+ * 
+ */
+static void rebuild_header_bar(void) {
+    // Delete existing header bar if it exists
+    if (g_header_bar) {
+        lv_obj_del(g_header_bar);
+        g_header_bar = NULL;
+        g_hamburger_btn = NULL;
+        g_gear_btn = NULL;
+        g_wifi_icon = NULL;
+    }
+    // Delete existing profile list if it exists
+    if (g_profile_list) {
+        lv_obj_del(g_profile_list);
+        g_profile_list = NULL;
+    }
+    // Create header bar container
+    lv_obj_t *scr = lv_disp_get_scr_act(g_disp);
+    g_header_bar = lv_obj_create(scr);
+    lv_obj_set_size(g_header_bar, g_current_width, 40);
+    lv_obj_align(g_header_bar, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_style_bg_color(g_header_bar, lv_color_hex(TITLE_BACKGROUND_COLOR), 0);
+    lv_obj_set_style_border_width(g_header_bar, 0, 0);
+    lv_obj_set_style_radius(g_header_bar, 0, 0);
+    lv_obj_set_style_pad_all(g_header_bar, 0, 0);
+    lv_obj_clear_flag(g_header_bar, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Hamburger button (left side) - rotation
+    g_hamburger_btn = lv_btn_create(g_header_bar);
+    lv_obj_set_size(g_hamburger_btn, 40, 40);
+    lv_obj_align(g_hamburger_btn, LV_ALIGN_LEFT_MID, 0, 0);
+    lv_obj_set_style_bg_color(g_hamburger_btn, lv_color_hex(TITLE_BACKGROUND_COLOR), 0);
+    lv_obj_set_style_border_width(g_hamburger_btn, 0, 0);
+    lv_obj_set_style_shadow_width(g_hamburger_btn, 0, 0);
+    lv_obj_add_event_cb(g_hamburger_btn, hamburger_btn_event_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *hamburger_label = lv_label_create(g_hamburger_btn);
+    lv_label_set_text(hamburger_label, LV_SYMBOL_LIST);
+    lv_obj_set_style_text_color(hamburger_label, lv_color_hex(TITLE_FOREGROUND_COLOR), 0);
+    lv_obj_center(hamburger_label);
+    lv_obj_clear_flag(hamburger_label, LV_OBJ_FLAG_CLICKABLE);
+
+    // Title label (centered in landscape, left-aligned in portrait)
+    lv_obj_t *title = lv_label_create(g_header_bar);
+    lv_obj_set_style_text_color(title, lv_color_hex(TITLE_FOREGROUND_COLOR), 0);
+    lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_letter_space(title, 1, 0);
+    lv_obj_clear_flag(title, LV_OBJ_FLAG_CLICKABLE);
+    if (g_is_portrait) {
+        // Portrait mode: shorter title and align next to hamburger button
+        lv_label_set_text(title, "Keymaker");
+        lv_obj_align(title, LV_ALIGN_LEFT_MID, 45, 0);
+    } else {
+        // Landscape mode: full title and center it
+        lv_label_set_text(title, "The Keymaker");
+        lv_obj_align(title, LV_ALIGN_CENTER, 0, 0);
+    }
+
+    // WiFi icon button (right side, before gear button)
+    lv_obj_t *wifi_btn = lv_btn_create(g_header_bar);
+    lv_obj_set_size(wifi_btn, 40, 40);
+    lv_obj_align(wifi_btn, LV_ALIGN_RIGHT_MID, -45, 0);  // 5px gap from gear button in both orientations
+    lv_obj_set_style_bg_color(wifi_btn, lv_color_hex(TITLE_BACKGROUND_COLOR), 0);
+    lv_obj_set_style_border_width(wifi_btn, 0, 0);
+    lv_obj_set_style_shadow_width(wifi_btn, 0, 0);
+    lv_obj_set_style_pad_all(wifi_btn, 0, 0);
+    lv_obj_add_event_cb(wifi_btn, wifi_icon_event_cb, LV_EVENT_CLICKED, NULL);
+
+    // WiFi icon label inside button
+    g_wifi_icon = lv_label_create(wifi_btn);
+    lv_label_set_text(g_wifi_icon, LV_SYMBOL_WIFI);
+    // Set WiFi icon color based on current connection status
+    if (g_wifi_state == WIFI_STATE_CONNECTED) {
+        lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_ACTIVE_COLOR), 0);  // Green when connected
+    } else if (g_wifi_state == WIFI_STATE_CONNECTING) {
+        lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_CONNECTING_COLOR), 0);  // Yellow when connecting
+    } else {
+        lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_INACTIVE_COLOR), 0);  // Gray when disconnected
+    }
+    lv_obj_set_style_text_font(g_wifi_icon, &lv_font_montserrat_20, 0);
+    lv_obj_center(g_wifi_icon);
+    lv_obj_clear_flag(g_wifi_icon, LV_OBJ_FLAG_CLICKABLE);
+
+    // Gear button (right side) - setup
+    g_gear_btn = lv_btn_create(g_header_bar);
+    lv_obj_set_size(g_gear_btn, 40, 40);
+    lv_obj_align(g_gear_btn, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_set_style_bg_color(g_gear_btn, lv_color_hex(TITLE_BACKGROUND_COLOR), 0);
+    lv_obj_set_style_border_width(g_gear_btn, 0, 0);
+    lv_obj_set_style_shadow_width(g_gear_btn, 0, 0);
+    lv_obj_set_style_pad_all(g_gear_btn, 0, 0);  // Remove padding for full clickable area
+    lv_obj_add_event_cb(g_gear_btn, gear_btn_event_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *gear_label = lv_label_create(g_gear_btn);
+    lv_label_set_text(gear_label, LV_SYMBOL_SETTINGS);
+    lv_obj_set_style_text_color(gear_label, lv_color_hex(TITLE_FOREGROUND_COLOR), 0);
+    lv_obj_center(gear_label);
+    lv_obj_clear_flag(gear_label, LV_OBJ_FLAG_CLICKABLE);
+} /**/
