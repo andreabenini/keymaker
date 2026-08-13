@@ -252,7 +252,7 @@ static void wifi_icon_event_cb(lv_event_t *e) {
 
 
 /**
- * 
+ * Rebuilding header bar
  */
 static void rebuild_header_bar(void) {
     // Delete existing header bar if it exists
