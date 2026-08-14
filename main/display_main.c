@@ -95,6 +95,7 @@ static void wifi_popup_close_cb(lv_event_t *e);
 static void wifi_icon_event_cb(lv_event_t *e);
 static void rebuild_header_bar(void);
 static void rebuild_profile_list(void);
+static void card_hide_otp_code(card_state_t *state);
 static void card_tap_event_cb(lv_event_t *e);
 static void progress_timer_cb(lv_timer_t *timer);
 
@@ -348,4 +349,28 @@ static void rebuild_header_bar(void) {
     lv_obj_set_style_text_color(gear_label, lv_color_hex(TITLE_FOREGROUND_COLOR), 0);
     lv_obj_center(gear_label);
     lv_obj_clear_flag(gear_label, LV_OBJ_FLAG_CLICKABLE);
+} /**/
+
+
+/**
+ * Tear down the OTP code display and show the label/issuer text again
+ */
+static void card_hide_otp_code(card_state_t *state) {
+    if (state->otp_label) {
+        lv_obj_del(state->otp_label);
+        state->otp_label = NULL;
+    }
+    if (state->progress_bg) {
+        lv_obj_del(state->progress_bg);
+        state->progress_bg = NULL;
+    }
+    if (state->timer) {
+        lv_timer_del(state->timer);
+        state->timer = NULL;
+    }
+    // Show text container again
+    if (state->text_container) {
+        lv_obj_clear_flag(state->text_container, LV_OBJ_FLAG_HIDDEN);
+    }
+    state->showing_code = false;
 } /**/
