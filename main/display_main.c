@@ -374,3 +374,42 @@ static void card_hide_otp_code(card_state_t *state) {
     }
     state->showing_code = false;
 } /**/
+
+
+/**
+ * Progress bar timer callback - updates progress and hides code when expired
+ */
+static void progress_timer_cb(lv_timer_t *timer) {
+    card_state_t *state = (card_state_t *)timer->user_data;
+    if (!state || !state->showing_code) {
+        return;
+    }
+    // Get current time and calculate remaining seconds
+    uint64_t current_time = time_sync_get_unix_time();
+    if (current_time == 0) {
+        // Time sync lost, hide the code
+        ESP_LOGW(TAG, "Time sync lost (get_unix_time returned 0), hiding OTP code");
+        card_hide_otp_code(state);
+        return;
+    }
+    // Check if we've passed the window end time
+    if (current_time >= state->window_end) {
+        // Code expired, hide it
+        ESP_LOGI(TAG, "OTP code expired: current=%llu, window_end=%llu", current_time, state->window_end);
+        card_hide_otp_code(state);
+        return;
+    }
+    // Update black background width based on time remaining
+    uint32_t remaining = state->window_end - current_time;
+    uint32_t window_duration = state->window_end - state->window_start;
+    int card_width = lv_obj_get_width(state->card);
+    int bg_width = (card_width - 50) * remaining / window_duration;  // Minus icon width
+    lv_obj_set_width(state->progress_bg, bg_width);
+    // Log every second for debugging
+    static uint64_t last_log_time = 0;
+    if (current_time != last_log_time) {
+        ESP_LOGI(TAG, "Progress: remaining=%lu sec, bg_width=%d", remaining, bg_width);
+        last_log_time = current_time;
+    }
+} /**/
+
