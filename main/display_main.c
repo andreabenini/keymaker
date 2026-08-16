@@ -413,3 +413,101 @@ static void progress_timer_cb(lv_timer_t *timer) {
     }
 } /**/
 
+
+/**
+ * Card tap event handler - shows OTP code or WiFi error
+ */
+static void card_tap_event_cb(lv_event_t *e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code != LV_EVENT_CLICKED) {
+        return;
+    }
+    card_state_t *state = (card_state_t *)lv_event_get_user_data(e);
+    if (!state) {
+        ESP_LOGE(TAG, "Card tap: no state data");
+        return;
+    }
+    ESP_LOGI(TAG, "Card tapped: profile index %d (showing_code=%d)", state->profile_index, state->showing_code);
+
+    // already showing code, clean up and restart with fresh code
+    if (state->showing_code) {
+        ESP_LOGI(TAG, "Card already showing code, restarting with fresh code");
+        card_hide_otp_code(state);
+    }
+
+    // Check if time is synchronized
+    bool is_synced = time_sync_is_synchronized();
+    ESP_LOGI(TAG, "Time sync check: %s", is_synced ? "SYNCED" : "NOT SYNCED");
+    if (!is_synced) {
+        ESP_LOGW(TAG, "Time not synchronized, showing error");
+        wifi_error_show(g_disp);
+        return;
+    }
+    ESP_LOGI(TAG, "Time is synchronized, generating OTP code");
+
+    // Load profile from config
+    keymaker_config_t *config = malloc(sizeof(keymaker_config_t));
+    if (!config) {
+        ESP_LOGE(TAG, "Failed to allocate memory for config");
+        return;
+    }
+    if (config_load(config) != ESP_OK || state->profile_index >= config->profile_count) {
+        ESP_LOGE(TAG, "Failed to load profile");
+        free(config);
+        return;
+    }
+    otp_profile_t *profile = &config->profiles[state->profile_index];
+
+    // Generate TOTP code
+    char code_str[16];
+    uint64_t current_time = time_sync_get_unix_time();
+    if (!totp_generate(profile, current_time, code_str)) {
+        ESP_LOGE(TAG, "Failed to generate TOTP code");
+        free(config);
+        return;
+    }
+    ESP_LOGI(TAG, "Generated code: %s", code_str);
+
+    // Hide label/issuer
+    if (state->text_container) {
+        lv_obj_add_flag(state->text_container, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    // Calculate TOTP window boundaries FIRST, Time counter is which 30-second window we're in
+    uint64_t time_counter = current_time / profile->period;
+    state->window_start = time_counter * profile->period;
+    state->window_end = (time_counter + 1) * profile->period;
+    state->period = profile->period;
+
+    // Calculate initial width based on remaining time
+    uint32_t remaining = state->window_end - current_time;
+    uint32_t window_duration = state->window_end - state->window_start;
+    int card_width = lv_obj_get_width(state->card);
+    int card_height = lv_obj_get_height(state->card);
+    int initial_bg_width = (card_width - 50) * remaining / window_duration;  // Minus icon width
+    ESP_LOGI(TAG, "TOTP window: %llu to %llu (current: %llu, remaining: %llu sec, initial_width: %d)", state->window_start, state->window_end, current_time, remaining, initial_bg_width);
+
+    // Create black background that shrinks as time progresses
+    state->progress_bg = lv_obj_create(state->card);
+    lv_obj_set_size(state->progress_bg, initial_bg_width, card_height);  // Set correct initial width
+    lv_obj_align(state->progress_bg, LV_ALIGN_LEFT_MID, 50, 0);  // Starts where OTP text begins
+    lv_obj_set_style_bg_color(state->progress_bg, lv_color_hex(OTP_PROGRESS_BG_COLOR), 0);
+    lv_obj_set_style_border_width(state->progress_bg, 0, 0);
+    lv_obj_set_style_radius(state->progress_bg, 0, 0);
+    lv_obj_set_style_pad_all(state->progress_bg, 0, 0);
+    lv_obj_clear_flag(state->progress_bg, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(state->progress_bg, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Create OTP code label on top of black background
+    state->otp_label = lv_label_create(state->card);
+    lv_label_set_text(state->otp_label, code_str);
+    lv_obj_set_style_text_color(state->otp_label, lv_color_hex(OTP_CODE_COLOR), 0);
+    lv_obj_set_style_text_font(state->otp_label, &lv_font_montserrat_48, 0);
+    lv_obj_align(state->otp_label, LV_ALIGN_LEFT_MID, 50, 0);  // Offset for icon
+    lv_obj_clear_flag(state->otp_label, LV_OBJ_FLAG_CLICKABLE);
+    state->showing_code = true;
+
+    // Create timer for progress bar updates (100ms interval)
+    state->timer = lv_timer_create(progress_timer_cb, 100, state);
+    free(config);
+} /**/
