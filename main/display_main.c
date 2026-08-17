@@ -514,7 +514,7 @@ static void card_tap_event_cb(lv_event_t *e) {
 
 
 /**
- *
+ * Building and rebuilding profile list on the main screen
  */
 static void rebuild_profile_list(void) {
     // Clean up any active card states (timers, etc)
