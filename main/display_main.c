@@ -511,3 +511,140 @@ static void card_tap_event_cb(lv_event_t *e) {
     state->timer = lv_timer_create(progress_timer_cb, 100, state);
     free(config);
 } /**/
+
+
+/**
+ *
+ */
+static void rebuild_profile_list(void) {
+    // Clean up any active card states (timers, etc)
+    for (int i = 0; i < g_card_state_count; i++) {
+        if (g_card_states[i].timer) {
+            lv_timer_del(g_card_states[i].timer);
+            g_card_states[i].timer = NULL;
+        }
+    }
+    g_card_state_count = 0;
+
+    // Delete existing profile list if it exists
+    if (g_profile_list) {
+        lv_obj_del(g_profile_list);
+        g_profile_list = NULL;
+    }
+    lv_obj_t *scr = lv_disp_get_scr_act(g_disp);
+
+    // Create scrollable container for profile cards
+    g_profile_list = lv_obj_create(scr);
+    lv_obj_set_size(g_profile_list, g_current_width, g_current_height - 40);        // Full width, height minus header
+    lv_obj_align(g_profile_list, LV_ALIGN_TOP_MID, 0, 40);                          // Position below header
+    lv_obj_set_style_bg_color(g_profile_list, lv_color_hex(SCREEN_BACKGROUND_COLOR), 0);
+    lv_obj_set_style_border_width(g_profile_list, 0, 0);
+    lv_obj_set_style_radius(g_profile_list, 0, 0);
+    lv_obj_set_style_pad_all(g_profile_list, 10, 0);
+    lv_obj_set_style_pad_right(g_profile_list, 0, 0);                               // No right padding for scrollbar alignment
+    // Scrollbar styling - align to right edge with no padding
+    lv_obj_set_style_pad_right(g_profile_list, 0, LV_PART_SCROLLBAR);
+    lv_obj_set_scrollbar_mode(g_profile_list, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_flex_flow(g_profile_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(g_profile_list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+
+    // Load profiles from config (allocate on heap to avoid stack overflow)
+    keymaker_config_t *config = malloc(sizeof(keymaker_config_t));
+    if (!config) {
+        ESP_LOGE(TAG, "Failed to allocate memory for config");
+        return;
+    }
+    esp_err_t ret = config_load(config);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "No profiles to display (config not found or empty)");
+        // Show "No profiles" message
+        lv_obj_t *no_profiles_label = lv_label_create(g_profile_list);
+        lv_label_set_text(no_profiles_label, "No profiles yet\n\nTap " LV_SYMBOL_SETTINGS " to add profiles");
+        lv_obj_set_style_text_color(no_profiles_label, lv_color_hex(CARD_TEXT_SECONDARY_COLOR), 0);
+        lv_obj_set_style_text_align(no_profiles_label, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_center(no_profiles_label);
+        free(config);
+        return;
+    }
+    ESP_LOGI(TAG, "Displaying %d profiles", config->profile_count);
+
+    // Create a card for each profile
+    for (int i = 0; i < config->profile_count; i++) {
+        // Create card container
+        otp_profile_t *profile = &config->profiles[i];
+        lv_obj_t *card = lv_obj_create(g_profile_list);
+        lv_obj_set_size(card, g_current_width - 22, 54);            // Leave room for scrollbar
+        lv_obj_set_x(card, 0);                                      // Flush left to gain space
+        lv_obj_set_style_bg_color(card, lv_color_hex(CARD_BACKGROUND_COLOR), 0);
+        lv_obj_set_style_border_width(card, 0, 0);
+        lv_obj_set_style_radius(card, 6, 0);
+        lv_obj_set_style_pad_all(card, 5, 0);                       // Compact padding
+        lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
+        // Create icon circle (left side)
+        lv_obj_t *icon = lv_obj_create(card);
+        lv_obj_set_size(icon, 40, 40);                              // icon size
+        lv_obj_align(icon, LV_ALIGN_LEFT_MID, 3, 0);                // 3px from left edge
+        lv_obj_set_style_bg_color(icon, lv_color_hex(CARD_ICON_BG_COLOR), 0);
+        lv_obj_set_style_border_width(icon, 0, 0);
+        lv_obj_set_style_radius(icon, 20, 0);                       // Make it circular
+        lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_clear_flag(icon, LV_OBJ_FLAG_CLICKABLE);
+        // Use profile icon field
+        lv_obj_t *icon_label = lv_label_create(icon);
+        lv_label_set_text(icon_label, profile->icon);
+        lv_obj_set_style_text_color(icon_label, lv_color_hex(CARD_ICON_TEXT_COLOR), 0);
+        lv_obj_set_style_text_font(icon_label, &lv_font_montserrat_20, 0);  // Font
+        lv_obj_center(icon_label);
+        lv_obj_clear_flag(icon_label, LV_OBJ_FLAG_CLICKABLE);
+        // Create text container (right side)
+        lv_obj_t *text_container = lv_obj_create(card);
+        lv_obj_set_size(text_container, g_current_width - 75, 40);  // Adjusted width
+        lv_obj_align(text_container, LV_ALIGN_LEFT_MID, 53, 0);     // Card spacing
+        lv_obj_set_style_bg_opa(text_container, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(text_container, 0, 0);
+        lv_obj_set_style_pad_all(text_container, 0, 0);
+        lv_obj_clear_flag(text_container, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_clear_flag(text_container, LV_OBJ_FLAG_CLICKABLE);
+        // Label (Line 1, always shown)
+        lv_obj_t *label_text = lv_label_create(text_container);
+        lv_label_set_text(label_text, profile->label);
+        lv_obj_set_style_text_color(label_text, lv_color_hex(CARD_TEXT_COLOR), 0);
+        lv_obj_set_style_text_font(label_text, &lv_font_montserrat_16, 0);  // Readable font
+        lv_obj_align(label_text, LV_ALIGN_TOP_LEFT, 0, 0);
+        lv_obj_clear_flag(label_text, LV_OBJ_FLAG_CLICKABLE);
+        lv_label_set_long_mode(label_text, LV_LABEL_LONG_DOT);
+        lv_obj_set_width(label_text, g_current_width - 75);
+        // Issuer (Line 2, smaller, only if present)
+        if (profile->issuer[0] != '\0') {
+            lv_obj_t *issuer_text = lv_label_create(text_container);
+            lv_label_set_text(issuer_text, profile->issuer);
+            lv_obj_set_style_text_color(issuer_text, lv_color_hex(CARD_TEXT_SECONDARY_COLOR), 0);
+            lv_obj_set_style_text_font(issuer_text, &lv_font_montserrat_16, 0);     // Issuer font
+            lv_obj_align(issuer_text, LV_ALIGN_TOP_LEFT, 0, 17);                    // Tighter to the border
+            lv_obj_clear_flag(issuer_text, LV_OBJ_FLAG_CLICKABLE);
+            lv_label_set_long_mode(issuer_text, LV_LABEL_LONG_DOT);
+            lv_obj_set_width(issuer_text, g_current_width - 75);
+        }
+        // Initialize card state and add tap handler
+        if (i < MAX_CARD_STATES) {
+            card_state_t *state = &g_card_states[i];
+            state->profile_index = i;
+            state->card = card;
+            state->text_container = text_container;
+            state->otp_label = NULL;
+            state->progress_bg = NULL;
+            state->timer = NULL;
+            state->showing_code = false;
+
+            // Add tap event to card
+            lv_obj_add_flag(card, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_add_event_cb(card, card_tap_event_cb, LV_EVENT_CLICKED, state);
+
+            g_card_state_count = i + 1;
+        }
+    }
+    // Free config memory
+    free(config);
+} /**/
+
+
