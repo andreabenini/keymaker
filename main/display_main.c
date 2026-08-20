@@ -648,3 +648,46 @@ static void rebuild_profile_list(void) {
 } /**/
 
 
+/**
+ * Create main screen display
+ */
+void display_main_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, esp_lcd_touch_handle_t touch_handle) {
+    // Store display, panel, and touch handles for rotation
+    ESP_LOGI(TAG, "DEBUG: display_main_create()");
+    g_disp = disp;
+    g_panel_handle = panel_handle;
+    g_touch_handle = touch_handle;
+
+    // Detect current rotation from display (in case we're coming from PIN screen in portrait)
+    lv_disp_rot_t rotation = lv_disp_get_rotation(disp);
+    if (rotation == LV_DISP_ROT_270 || rotation == LV_DISP_ROT_90) {
+        // Portrait mode
+        g_is_portrait = true;
+        g_current_width = LCD_V_RES;
+        g_current_height = LCD_H_RES;
+        ESP_LOGI(TAG, "Main screen created in portrait mode (rotation=%d)", rotation);
+    } else {
+        // Landscape mode
+        g_is_portrait = false;
+        g_current_width = LCD_H_RES;
+        g_current_height = LCD_V_RES;
+        ESP_LOGI(TAG, "Main screen created in landscape mode (rotation=%d)", rotation);
+    }
+
+    lv_obj_t *scr = lv_disp_get_scr_act(disp);
+    ESP_LOGI(TAG, "DEBUG: Active screen in display_main_create: %p", scr);
+
+    // Set background to dark gray
+    lv_obj_set_style_bg_color(scr, lv_color_hex(SCREEN_BACKGROUND_COLOR), 0);
+
+    // Build the initial header bar
+    ESP_LOGI(TAG, "DEBUG: Building header bar...");
+    rebuild_header_bar();
+
+    // Build the initial profile list
+    ESP_LOGI(TAG, "DEBUG: Building profile list...");
+    rebuild_profile_list();
+
+    ESP_LOGI(TAG, "DEBUG: display_main_create() completed");
+} /**/
+
