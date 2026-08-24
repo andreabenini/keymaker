@@ -673,21 +673,12 @@ void display_main_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, e
         g_current_height = LCD_V_RES;
         ESP_LOGI(TAG, "Main screen created in landscape mode (rotation=%d)", rotation);
     }
-
     lv_obj_t *scr = lv_disp_get_scr_act(disp);
     ESP_LOGI(TAG, "DEBUG: Active screen in display_main_create: %p", scr);
-
-    // Set background to dark gray
-    lv_obj_set_style_bg_color(scr, lv_color_hex(SCREEN_BACKGROUND_COLOR), 0);
-
-    // Build the initial header bar
-    ESP_LOGI(TAG, "DEBUG: Building header bar...");
+    lv_obj_set_style_bg_color(scr, lv_color_hex(SCREEN_BACKGROUND_COLOR), 0);       // Set background to dark gray
+    ESP_LOGI(TAG, "DEBUG: Building header bar...");                                 // Build the initial header bar
     rebuild_header_bar();
-
-    // Build the initial profile list
-    ESP_LOGI(TAG, "DEBUG: Building profile list...");
+    ESP_LOGI(TAG, "DEBUG: Building profile list...");                               // Build the initial profile list
     rebuild_profile_list();
-
     ESP_LOGI(TAG, "DEBUG: display_main_create() completed");
 } /**/
-
