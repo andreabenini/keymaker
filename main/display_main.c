@@ -694,9 +694,9 @@ void display_main_set_wifi_status(bool connected) {
     // Update WiFi icon if it exists
     if (g_wifi_icon) {
         if (connected) {
-            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_ACTIVE_COLOR), 0);  // Bright green when connected
+            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_ACTIVE_COLOR), 0);   // Bright green when connected
         } else {
-            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_INACTIVE_COLOR), 0);  // Gray when disconnected
+            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_INACTIVE_COLOR), 0); // Gray when disconnected
         }
     }
 } /**/
