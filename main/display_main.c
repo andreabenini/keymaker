@@ -682,3 +682,21 @@ void display_main_create(lv_disp_t *disp, esp_lcd_panel_handle_t panel_handle, e
     rebuild_profile_list();
     ESP_LOGI(TAG, "DEBUG: display_main_create() completed");
 } /**/
+
+
+/**
+ * Setting wifi status
+ */
+void display_main_set_wifi_status(bool connected) {
+    // Update global WiFi state
+    g_wifi_connected = connected;
+    g_wifi_state = connected ? WIFI_STATE_CONNECTED : WIFI_STATE_DISCONNECTED;
+    // Update WiFi icon if it exists
+    if (g_wifi_icon) {
+        if (connected) {
+            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_ACTIVE_COLOR), 0);  // Bright green when connected
+        } else {
+            lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_INACTIVE_COLOR), 0);  // Gray when disconnected
+        }
+    }
+} /**/
