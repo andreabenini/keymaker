@@ -713,3 +713,19 @@ void display_main_set_wifi_connecting(void) {
         lv_obj_set_style_text_color(g_wifi_icon, lv_color_hex(WIFI_CONNECTING_COLOR), 0);  // Yellow when connecting
     }
 } /**/
+
+
+/**
+ * Setting up main wifi information
+ */
+void display_main_set_wifi_info(const char *ssid, const char *ip_addr, int8_t rssi) {
+    if (ssid) {
+        strncpy(g_wifi_ssid, ssid, sizeof(g_wifi_ssid) - 1);
+        g_wifi_ssid[sizeof(g_wifi_ssid) - 1] = '\0';
+    }
+    if (ip_addr) {
+        strncpy(g_wifi_ip, ip_addr, sizeof(g_wifi_ip) - 1);
+        g_wifi_ip[sizeof(g_wifi_ip) - 1] = '\0';
+    }
+    g_wifi_rssi = rssi;
+} /**/
