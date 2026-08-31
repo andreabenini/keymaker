@@ -729,3 +729,10 @@ void display_main_set_wifi_info(const char *ssid, const char *ip_addr, int8_t rs
     }
     g_wifi_rssi = rssi;
 } /**/
+
+/**
+ * Set flag to reconnect to wifi
+ */
+void display_main_request_wifi_reconnect(void) {
+    g_wifi_reconnect_requested = true;
+} /**/
