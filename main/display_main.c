@@ -736,3 +736,15 @@ void display_main_set_wifi_info(const char *ssid, const char *ip_addr, int8_t rs
 void display_main_request_wifi_reconnect(void) {
     g_wifi_reconnect_requested = true;
 } /**/
+
+
+/**
+ * Get flag to reconnect to wifi
+ */
+bool display_main_check_wifi_reconnect_requested(void) {
+    bool requested = g_wifi_reconnect_requested;
+    if (requested) {
+        g_wifi_reconnect_requested = false;  // Clear flag
+    }
+    return requested;
+} /**/
